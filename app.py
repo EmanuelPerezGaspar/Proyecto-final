@@ -43,7 +43,7 @@ else:
 # ==================== DATOS DE LA IMPRESIÓN ====================
 st.header("📋 Datos de la impresión")
 
-cliente = st.text_input("Cliente / Modelo", "Emanuel")
+cliente = st.text_input("Cliente / Modelo", "")
 
 es_multicolor = st.checkbox("¿Es impresión multicolor?", value=False)
 
@@ -86,7 +86,7 @@ else:
 # ==================== OTROS CAMPOS ====================
 col1, col2 = st.columns(2)
 with col1:
-    tiempo_impresion = st.number_input("Tiempo total de impresión (horas)", min_value=0.1, value=14.0, step=0.1)
+    tiempo_impresion = st.number_input("Tiempo total de impresión (horas)", min_value=0.1, value=0.0, step=0.1)
     num_placas = st.number_input("Número de placas", min_value=1, value=2)
 
 # ==================== CÁLCULO ====================
