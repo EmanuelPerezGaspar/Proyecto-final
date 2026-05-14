@@ -50,28 +50,33 @@ es_multicolor = st.checkbox("¿Es impresión multicolor?", value=False)
 # ==================== MATERIALES ====================
 if es_multicolor:
     st.subheader("Materiales (hasta 6)")
-    num_materiales = st.slider("Cantidad de materiales diferentes", 1, 6, 3)
+    num_materiales = st.slider("Cantidad de materiales diferentes", min_value=2, max_value=6, value=3)
+    
     peso_total = 0.0
     for i in range(num_materiales):
         col1, col2 = st.columns([3, 1])
         with col1:
             mat = st.selectbox(f"Material {i+1}", [
-                "Creality PLA - Negro", "Mexico Maker PLA PRO - Azul Talavera",
-                "Mexico Maker PLA MATTE - Negro Carbon", "Mexico Maker PLA FLEX - Naranja",
+                "Creality PLA - Negro", 
+                "Mexico Maker PLA PRO - Azul Talavera",
+                "Mexico Maker PLA MATTE - Negro Carbon", 
+                "Mexico Maker PLA FLEX - Naranja",
                 "Mexico Maker PETG - Negro"
             ], key=f"mat_{i}")
         with col2:
             peso = st.number_input(f"Gramos {i+1}", min_value=0.0, value=20.0, step=1.0, key=f"peso_{i}")
         peso_total += peso
-    precio_kg = 430
+    precio_kg = 430  # Promedio temporal
 
 else:
-    # === Formato limpio cuando NO es multicolor ===
+    # Formato simple cuando NO es multicolor
     col_mat, col_peso = st.columns([3, 2])
     with col_mat:
         material = st.selectbox("Material principal", [
-            "Creality PLA - Negro", "Mexico Maker PLA PRO - Azul Talavera",
-            "Mexico Maker PLA MATTE - Negro Carbon", "Mexico Maker PLA FLEX - Naranja",
+            "Creality PLA - Negro", 
+            "Mexico Maker PLA PRO - Azul Talavera",
+            "Mexico Maker PLA MATTE - Negro Carbon", 
+            "Mexico Maker PLA FLEX - Naranja",
             "Mexico Maker PETG - Negro"
         ])
     with col_peso:
