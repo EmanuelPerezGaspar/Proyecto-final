@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Calculadora de Precios", layout="centered")
 
-st.title("🖨️ MINIPRINTS ")
+st.title("🖨️ MiniPrints")
 
 # ==================== CONFIGURACIÓN (SIDEBAR) ====================
 st.sidebar.header("⚙️ Parametros básicos")
@@ -105,4 +105,4 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
         st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
 
 st.caption("Calculadora 3D © 2026")
-st.caption("Powered by MINIPRINTS")
+st.caption("Powered by MiniPrints")
