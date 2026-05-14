@@ -90,10 +90,9 @@ with st.sidebar.expander("🗑️ Eliminar Material"):
 # ==================== DATOS DE LA IMPRESIÓN ====================
 st.header("📋 Datos de la impresión")
 
-cliente = st.text_input("Cliente / Modelo", "Emanuel")
+cliente = st.text_input("Cliente / Modelo", "")
 
 es_multicolor = st.checkbox("¿Es impresión multicolor?", value=False)
-multiples_impresiones = st.checkbox("¿La impresión consta de más de una impresión?", value=False)
 
 materiales_lista = list(st.session_state.materiales.keys())
 
@@ -119,8 +118,11 @@ else:
     precio_kg = st.session_state.materiales.get(material, 400)
 
 # ==================== TIEMPO DE IMPRESIÓN ====================
+ st.subheader("Tiempos por impresión")
+multiples_impresiones = st.checkbox("¿La impresión consta de más de una impresión?", value=False)
+
 if multiples_impresiones:
-    st.subheader("Tiempos por impresión")
+   
     num_impresiones = st.slider("Cantidad de impresiones", min_value=2, max_value=10, value=2)
     tiempo_total = 0.0
     for i in range(num_impresiones):
