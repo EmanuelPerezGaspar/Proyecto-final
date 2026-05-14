@@ -1,12 +1,30 @@
 import streamlit as st
 
-st.set_page_config(page_title="Calculadora de Precios 3D", layout="centered")
+st.set_page_config(page_title="Calculadora de Precios", layout="centered")
 
-st.title("🖨️ Calculadora de Precios 3D")
-st.subheader("Emanuel Pérez - Impresiones 3D")
+st.title("🖨️ MINIPRINTS ")
 
 # ==================== CONFIGURACIÓN (SIDEBAR) ====================
-st.sidebar.header("⚙️ Configuración")
+st.sidebar.header("⚙️ Parametros básicos")
+
+# Margen de Ganancia (editable y permite más del 100%)
+margen_ganancia = st.sidebar.number_input(
+    "Margen de ganancia deseado (%)", 
+    value=65.0, 
+    step=5.0, 
+    min_value=0.0, 
+    max_value=500.0
+) / 100
+
+# Selección de impresora
+impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
+
+if impresora == "A1 MINI":
+    consumo = 280
+    costo_maquina_hora = 12
+else:
+    consumo = 350
+    costo_maquina_hora = 18
 
 # Valores FIJOS
 st.sidebar.metric("💡 Costo electricidad kWh", "5.00 MXN")
@@ -25,15 +43,6 @@ else:
     costo_mano_obra_hora = 0.0
     horas_mano_obra = 0.0
 
-# Margen de Ganancia (editable y permite más del 100%)
-margen_ganancia = st.sidebar.number_input(
-    "Margen de ganancia deseado (%)", 
-    value=65.0, 
-    step=5.0, 
-    min_value=0.0, 
-    max_value=500.0
-) / 100
-
 # IVA con checkbox
 aplicar_iva = st.sidebar.checkbox("¿Aplicar IVA (16%)?", value=True)
 iva = 0.16 if aplicar_iva else 0.0
@@ -43,15 +52,6 @@ if aplicar_iva:
 else:
     st.sidebar.metric("📌 IVA aplicado", "0 %")
 
-# Selección de impresora
-impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
-
-if impresora == "A1 MINI":
-    consumo = 280
-    costo_maquina_hora = 12
-else:
-    consumo = 350
-    costo_maquina_hora = 18
 
 # ==================== DATOS DE LA IMPRESIÓN ====================
 st.header("📋 Datos de la impresión")
