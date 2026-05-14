@@ -5,7 +5,7 @@ import os
 st.set_page_config(page_title="Calculadora de Precios", layout="centered")
 st.title("🖨️ Mini Prints")
 
-# ==================== GESTOR DE MATERIALES (PERSISTENTE) ====================
+# ==================== GESTOR DE MATERIALES ====================
 DATA_FILE = "materiales.json"
 
 def cargar_materiales():
@@ -33,7 +33,7 @@ if 'materiales' not in st.session_state:
 # ==================== CONFIGURACIÓN (SIDEBAR) ====================
 st.sidebar.header("⚙️ Parametros básicos")
 
-# === GESTOR DE MATERIALES ===
+# Gestor de Materiales
 with st.sidebar.expander("➕ Agregar Nuevo Material"):
     nuevo_nombre = st.text_input("Nombre completo del material")
     nuevo_precio = st.number_input("Precio por kg ($)", min_value=0.0, value=350.0, step=10.0)
@@ -47,17 +47,14 @@ with st.sidebar.expander("➕ Agregar Nuevo Material"):
 
 with st.sidebar.expander("🗑️ Eliminar Material"):
     if st.session_state.materiales:
-        material_a_eliminar = st.selectbox("Selecciona material a eliminar", 
-                                         options=list(st.session_state.materiales.keys()))
+        material_a_eliminar = st.selectbox("Selecciona material a eliminar", options=list(st.session_state.materiales.keys()))
         if st.button("Eliminar Material", type="secondary"):
             if material_a_eliminar in st.session_state.materiales:
                 del st.session_state.materiales[material_a_eliminar]
                 guardar_materiales(st.session_state.materiales)
                 st.success(f"🗑️ {material_a_eliminar} eliminado")
-            else:
-                st.error("Material no encontrado")
     else:
-        st.write("No hay materiales para eliminar")
+        st.write("No hay materiales")
 
 margen_ganancia = st.sidebar.number_input("Margen de ganancia deseado (%)", value=65.0, step=5.0, min_value=0.0, max_value=500.0) / 100
 
@@ -121,8 +118,28 @@ else:
         peso_total = st.number_input("Peso TOTAL filamento (gramos)", min_value=0.0, value=None, step=1.0, placeholder="0.0")
     precio_kg = st.session_state.materiales.get(material, 400)
 
-# ... (el resto del código de tiempo y cálculo se mantiene igual)
-# (Pega aquí el resto de tu código anterior de tiempo y cálculo)
+# ==================== TIEMPO DE IMPRESIÓN ====================
+if multiples_impresiones:
+    st.subheader("Tiempos por impresión")
+    num_impresiones = st.slider("Cantidad de impresiones", min_value=2, max_value=10, value=2)
+    tiempo_total = 0.0
+    for i in range(num_impresiones):
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            horas = st.number_input(f"Horas impresión {i+1}", min_value=0, value=None, step=1, key=f"horas_{i}", placeholder="0")
+        with col2:
+            minutos = st.number_input(f"Minutos impresión {i+1}", min_value=0, max_value=59, value=None, step=1, key=f"min_{i}", placeholder="0")
+        tiempo_total += (horas or 0) + ((minutos or 0) / 60)
+else:
+    st.subheader("Tiempo de impresión")
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        horas = st.number_input("Horas", min_value=0, value=None, step=1, placeholder="0")
+    with col2:
+        minutos = st.number_input("Minutos", min_value=0, max_value=59, value=None, step=1, placeholder="0")
+    tiempo_total = (horas or 0) + ((minutos or 0) / 60)
+
+num_placas = st.number_input("Número de placas", min_value=1, value=None, step=1, placeholder="1")
 
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
