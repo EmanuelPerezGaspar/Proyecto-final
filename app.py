@@ -7,17 +7,35 @@ st.title("Calculadora de precios")
 # ==================== CONFIGURACIÓN ====================
 st.sidebar.header("⚙️ Configuración")
 
-# Costo electricidad FIJO (no se puede cambiar)
-st.sidebar.metric("Costo electricidad kWh", "5.00 MXN")
-costo_electricidad = 5.00   # ← Valor fijo
+# Valores FIJOS
+st.sidebar.metric("💡 Costo electricidad kWh", "5.00 MXN")
+costo_electricidad = 5.00
 
-costo_mano_obra = st.sidebar.number_input("Costo mano de obra / hora", value=20.0, step=5.0)
-margen_falla = st.sidebar.number_input("Margen de falla (%)", value=10, step=1, min_value=0, max_value=50) / 100
-margen_ganancia = st.sidebar.number_input("Margen de ganancia (%)", value=60, step=5, min_value=10, max_value=90) / 100
-iva = st.sidebar.number_input("IVA (%)", value=16, step=1, min_value=0, max_value=100) / 100
+st.sidebar.metric("🛠️ Margen de falla", "10 %")
+margen_falla = 0.10
 
-impresora = st.sidebar.selectbox("Impresora", ["A1 MINI", "A1"])
+# Valores editables
+costo_mano_obra = st.sidebar.number_input("Costo mano de obra / hora ($)", value=20.0, step=5.0, min_value=0.0)
 
+margen_ganancia = st.sidebar.number_input(
+    "Margen de ganancia deseado (%)", 
+    value=65.0, 
+    step=5.0, 
+    min_value=0.0, 
+    max_value=500.0   # Permite más del 100%
+) / 100
+
+# Checkbox para IVA
+aplicar_iva = st.sidebar.checkbox("¿Aplicar IVA (16%)?", value=True)
+iva = 0.16 if aplicar_iva else 0.0
+
+# Mostrar el IVA aplicado
+if aplicar_iva:
+    st.sidebar.metric("📌 IVA aplicado", "16 %")
+else:
+    st.sidebar.metric("📌 IVA aplicado", "0 %")
+
+impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
 if impresora == "A1 MINI":
     consumo = 280
     costo_maquina = 12
