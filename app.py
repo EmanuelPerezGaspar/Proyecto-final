@@ -1,14 +1,56 @@
 import streamlit as st
+import json
+import os
 
 st.set_page_config(page_title="Calculadora de Precios", layout="centered")
 st.title("🖨️ Mini Prints")
 
+# ==================== GESTOR DE MATERIALES (PERSISTENTE) ====================
+DATA_FILE = "materiales.json"
+
+def cargar_materiales():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    else:
+        iniciales = {
+            "Creality PLA - Negro": 399,
+            "Mexico Maker PLA PRO - Azul Talavera": 399,
+            "Mexico Maker PLA MATTE - Negro Carbon": 460,
+            "Mexico Maker PLA FLEX - Naranja": 449,
+            "Mexico Maker PETG - Negro": 380,
+        }
+        guardar_materiales(iniciales)
+        return iniciales
+
+def guardar_materiales(diccionario):
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(diccionario, f, ensure_ascii=False, indent=4)
+
+if 'materiales' not in st.session_state:
+    st.session_state.materiales = cargar_materiales()
+
 # ==================== CONFIGURACIÓN (SIDEBAR) ====================
 st.sidebar.header("⚙️ Parametros básicos")
 
+# Gestor de Materiales
+with st.sidebar.expander("➕ Agregar Nuevo Material"):
+    nuevo_nombre = st.text_input("Nombre completo del material")
+    nuevo_precio = st.number_input("Precio por kg ($)", min_value=0.0, value=350.0, step=10.0)
+    if st.button("Agregar Material"):
+        if nuevo_nombre.strip():
+            st.session_state.materiales[nuevo_nombre.strip()] = nuevo_precio
+            guardar_materiales(st.session_state.materiales)
+            st.success(f"✅ {nuevo_nombre} agregado y guardado permanentemente")
+        else:
+            st.error("Por favor escribe un nombre")
+
 margen_ganancia = st.sidebar.number_input(
     "Margen de ganancia deseado (%)",
-    value=65.0, step=5.0, min_value=0.0, max_value=500.0
+    value=65.0,
+    step=5.0,
+    min_value=0.0,
+    max_value=500.0
 ) / 100
 
 impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
@@ -43,9 +85,12 @@ else:
 # ==================== DATOS DE LA IMPRESIÓN ====================
 st.header("📋 Datos de la impresión")
 
-cliente = st.text_input("Cliente / Modelo", "")
+cliente = st.text_input("Cliente / Modelo", "Emanuel")
 
 es_multicolor = st.checkbox("¿Es impresión multicolor?", value=False)
+multiples_impresiones = st.checkbox("¿La impresión consta de más de una impresión?", value=False)
+
+materiales_lista = list(st.session_state.materiales.keys())
 
 # ==================== MATERIALES ====================
 if es_multicolor:
@@ -55,32 +100,20 @@ if es_multicolor:
     for i in range(num_materiales):
         col1, col2 = st.columns([3, 1])
         with col1:
-            mat = st.selectbox(f"Material {i+1}", [
-                "Creality PLA - Negro", "Mexico Maker PLA PRO - Azul Talavera",
-                "Mexico Maker PLA MATTE - Negro Carbon", "Mexico Maker PLA FLEX - Naranja",
-                "Mexico Maker PETG - Negro"
-            ], key=f"mat_{i}")
+            mat = st.selectbox(f"Material {i+1}", materiales_lista, key=f"mat_{i}")
         with col2:
             peso = st.number_input(f"Gramos {i+1}", min_value=0.0, value=None, step=1.0, key=f"peso_{i}", placeholder="0.0")
         peso_total += peso if peso is not None else 0
-    precio_kg = 430
+    precio_kg = 430  # Promedio temporal
 else:
     col_mat, col_peso = st.columns([3, 2])
     with col_mat:
-        material = st.selectbox("Material principal", [
-            "Creality PLA - Negro", "Mexico Maker PLA PRO - Azul Talavera",
-            "Mexico Maker PLA MATTE - Negro Carbon", "Mexico Maker PLA FLEX - Naranja",
-            "Mexico Maker PETG - Negro"
-        ])
+        material = st.selectbox("Material principal", materiales_lista)
     with col_peso:
         peso_total = st.number_input("Peso TOTAL filamento (gramos)", min_value=0.0, value=None, step=1.0, placeholder="0.0")
-    precio_kg = 399 if "Creality" in material else 460
+    precio_kg = st.session_state.materiales.get(material, 400)
 
 # ==================== TIEMPO DE IMPRESIÓN ====================
-
-# Nueva pregunta: Múltiples impresiones
-multiples_impresiones = st.checkbox("¿La impresión consta de más de una impresión?", value=False)
-
 if multiples_impresiones:
     st.subheader("Tiempos por impresión")
     num_impresiones = st.slider("Cantidad de impresiones", min_value=2, max_value=10, value=2)
