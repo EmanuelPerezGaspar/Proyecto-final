@@ -47,9 +47,6 @@ cliente = st.text_input("Cliente / Modelo", "")
 
 es_multicolor = st.checkbox("¿Es impresión multicolor?", value=False)
 
-# Nueva pregunta: Múltiples impresiones
-multiples_impresiones = st.checkbox("¿La impresión consta de más de una impresión?", value=False)
-
 # ==================== MATERIALES ====================
 if es_multicolor:
     st.subheader("Materiales (hasta 6)")
@@ -80,6 +77,10 @@ else:
     precio_kg = 399 if "Creality" in material else 460
 
 # ==================== TIEMPO DE IMPRESIÓN ====================
+
+# Nueva pregunta: Múltiples impresiones
+multiples_impresiones = st.checkbox("¿La impresión consta de más de una impresión?", value=False)
+
 if multiples_impresiones:
     st.subheader("Tiempos por impresión")
     num_impresiones = st.slider("Cantidad de impresiones", min_value=2, max_value=10, value=2)
