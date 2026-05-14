@@ -58,8 +58,6 @@ st.header("📋 Datos de la impresión")
 
 cliente = st.text_input("Cliente / Modelo", "Emanuel")
 
-es_multicolor = st.checkbox("¿Es impresión multicolor?", value=False)
-
 # ==================== MATERIALES ====================
 if es_multicolor:
     st.subheader("Materiales (hasta 6)")
