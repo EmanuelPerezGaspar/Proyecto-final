@@ -64,12 +64,11 @@ if es_multicolor:
                 "Mexico Maker PETG - Negro"
             ], key=f"mat_{i}")
         with col2:
-            peso = st.number_input(f"Gramos {i+1}", min_value=0.0, value=20.0, step=1.0, key=f"peso_{i}")
-        peso_total += peso
-    precio_kg = 430  # Promedio temporal
+            peso = st.number_input(f"Gramos {i+1}", min_value=0.0, value=None, step=1.0, key=f"peso_{i}", placeholder="0.0")
+        peso_total += peso if peso is not None else 0
+    precio_kg = 430
 
 else:
-    # Formato simple cuando NO es multicolor
     col_mat, col_peso = st.columns([3, 2])
     with col_mat:
         material = st.selectbox("Material principal", [
@@ -80,14 +79,16 @@ else:
             "Mexico Maker PETG - Negro"
         ])
     with col_peso:
-        peso_total = st.number_input("Peso TOTAL filamento (gramos)", min_value=1.0, value=6.0, step=1.0)
-    precio_kg = 399 if "Creality" in material else 460
+        peso_total = st.number_input("Peso TOTAL filamento (gramos)", min_value=0.0, value=None, step=1.0, placeholder="0.0")
 
-# ==================== OTROS CAMPOS ====================
+# Resto de campos (sin valores por defecto)
 col1, col2 = st.columns(2)
 with col1:
-    tiempo_impresion = st.number_input("Tiempo total de impresión (horas)", min_value=0.1, value=1.0, step=0.1)
-    num_placas = st.number_input("Número de placas", min_value=1, value=2)
+    tiempo_impresion = st.number_input("Tiempo total de impresión (horas)", min_value=0.0, value=None, step=0.1, placeholder="0.0")
+    num_placas = st.number_input("Número de placas", min_value=1, value=None, step=1, placeholder="1")
+
+with col2:
+    pass  # espacio para balancear
 
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
