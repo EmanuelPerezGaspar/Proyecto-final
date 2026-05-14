@@ -193,8 +193,47 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     
     st.write(f"**Subtotal + Falla (10%):** ${subtotal_con_falla:,.2f}")
     
-    if aplicar_iva:
+       if aplicar_iva:
         st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
+
+    # ==================== COMPARTIR ====================
+    st.divider()
+    st.write("### 📤 Compartir Cotización")
+
+    # Crear texto para compartir
+    resumen = f"""Cotización Mini Prints
+
+Cliente / Modelo: {cliente}
+Tiempo total: {tiempo_total:.2f} horas
+Peso total: {peso_total}g
+"""
+
+    if es_multicolor:
+        for i in range(num_materiales):
+            mat_key = f"mat_{i}"
+            peso_key = f"peso_{i}"
+            mat = st.session_state.get(mat_key, "Desconocido")
+            peso = st.session_state.get(peso_key, 0)
+            resumen += f"- {mat}: {peso}g\n"
+    else:
+        resumen += f"- {material}: {peso_total}g\n"
+
+    resumen += f"""
+Precio Final: ${precio_final:,.2f} MXN
+"""
+
+    col_share1, col_share2 = st.columns(2)
+    with col_share1:
+        if st.button("📱 Compartir por WhatsApp", use_container_width=True):
+            import urllib.parse
+            mensaje = urllib.parse.quote(resumen)
+            whatsapp_url = f"https://wa.me/?text={mensaje}"
+            st.markdown(f"[Abrir WhatsApp con esta cotización]({whatsapp_url})", unsafe_allow_html=True)
+
+    with col_share2:
+        if st.button("📋 Copiar Resumen", use_container_width=True):
+            st.code(resumen, language=None)
+            st.success("✅ Resumen copiado al portapapeles. Pégalo en WhatsApp o correo.")
 
 st.caption("Calculadora 3D © 2026")
 st.caption("Powered by Mini Prints")
