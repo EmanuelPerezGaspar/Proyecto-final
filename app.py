@@ -4,14 +4,17 @@ st.set_page_config(page_title="Calculadora 3D", layout="centered")
 
 st.title("Calculadora de precios")
 
-# Configuración
-st.sidebar.header("⚙️ Configuración tecnica")
+# ==================== CONFIGURACIÓN ====================
+st.sidebar.header("⚙️ Configuración")
 
-costo_electricidad = st.sidebar.number_input("Costo electricidad kWh", value=5.0, step=0.1)
+# Costo electricidad FIJO (no se puede cambiar)
+st.sidebar.metric("Costo electricidad kWh", "5.00 MXN")
+costo_electricidad = 5.00   # ← Valor fijo
+
 costo_mano_obra = st.sidebar.number_input("Costo mano de obra / hora", value=20.0, step=5.0)
-margen_falla = st.sidebar.number_input("Margen de falla (%)", value=10, step=1) / 100
-margen_ganancia = st.sidebar.number_input("Margen de ganancia (%)", value=65, step=5) / 100
-iva = st.sidebar.number_input("IVA (%)", value=16, step=1) / 100
+margen_falla = st.sidebar.number_input("Margen de falla (%)", value=10, step=1, min_value=0, max_value=50) / 100
+margen_ganancia = st.sidebar.number_input("Margen de ganancia (%)", value=60, step=5, min_value=10, max_value=90) / 100
+iva = st.sidebar.number_input("IVA (%)", value=16, step=1, min_value=0, max_value=100) / 100
 
 impresora = st.sidebar.selectbox("Impresora", ["A1 MINI", "A1"])
 
