@@ -25,7 +25,7 @@ else:
 # Datos de la impresión
 st.header("📋 Información")
 
-cliente = st.text_input("Cliente / Modelo", "Cliente / Pedido")
+cliente = st.text_input("Cliente / Modelo", "Cliente / Modelo")
 tiempo = st.number_input("Tiempo de impresión (horas)", min_value=0.1, value=14.0, step=0.1)
 peso = st.number_input("Filamento usado (g)", min_value=1.0, value=6.0, step=1.0)
 
