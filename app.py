@@ -1,11 +1,19 @@
 import streamlit as st
 
-st.set_page_config(page_title="Calculadora 3D", layout="centered")
+st.set_page_config(page_title="Calculadora de Precios 3D", layout="centered")
 
-st.title("Calculadora de precios")
+st.title("🖨️ Calculadora de Precios 3D")
+st.subheader("Emanuel Pérez - Impresiones 3D")
 
-# ==================== CONFIGURACIÓN ====================
+# ==================== CONFIGURACIÓN (SIDEBAR) ====================
 st.sidebar.header("⚙️ Configuración")
+
+# Valores FIJOS
+st.sidebar.metric("💡 Costo electricidad kWh", "5.00 MXN")
+costo_electricidad = 5.00
+
+st.sidebar.metric("🛠️ Margen de falla", "10 %")
+margen_falla = 0.10
 
 # Mano de Obra Opcional
 aplicar_mano_obra = st.sidebar.checkbox("¿Aplicar costo de mano de obra?", value=True)
@@ -17,7 +25,7 @@ else:
     costo_mano_obra_hora = 0.0
     horas_mano_obra = 0.0
 
-# Margen de Ganancia (editable y permite >100%)
+# Margen de Ganancia (editable y permite más del 100%)
 margen_ganancia = st.sidebar.number_input(
     "Margen de ganancia deseado (%)", 
     value=65.0, 
@@ -25,14 +33,6 @@ margen_ganancia = st.sidebar.number_input(
     min_value=0.0, 
     max_value=500.0
 ) / 100
-
-impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
-if impresora == "A1 MINI":
-    consumo = 280
-    costo_maquina = 12
-else:
-    consumo = 350
-    costo_maquina = 18
 
 # IVA con checkbox
 aplicar_iva = st.sidebar.checkbox("¿Aplicar IVA (16%)?", value=True)
@@ -42,47 +42,66 @@ if aplicar_iva:
     st.sidebar.metric("📌 IVA aplicado", "16 %")
 else:
     st.sidebar.metric("📌 IVA aplicado", "0 %")
-    
-# Valores FIJOS
-st.sidebar.metric("💡 Costo electricidad kWh", "5.00 MXN")
-costo_electricidad = 5.00
 
-st.sidebar.metric("🛠️ Margen de falla", "10 %")
-margen_falla = 0.10
+# Selección de impresora
+impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
 
-# Datos de la impresión
-st.header("📋 Información")
+if impresora == "A1 MINI":
+    consumo = 280
+    costo_maquina_hora = 12
+else:
+    consumo = 350
+    costo_maquina_hora = 18
 
-cliente = st.text_input("Cliente / Modelo", "Cliente / Modelo")
-tiempo = st.number_input("Tiempo de impresión (horas)", min_value=0.1, value=14.0, step=0.1)
-peso = st.number_input("Filamento usado (g)", min_value=1.0, value=6.0, step=1.0)
+# ==================== DATOS DE LA IMPRESIÓN ====================
+st.header("📋 Datos de la impresión")
 
-material = st.selectbox("Filamento", [
+col1, col2 = st.columns(2)
+
+with col1:
+    cliente = st.text_input("Cliente / Pedido", "Emanuel")
+    tiempo_impresion = st.number_input("Tiempo total de impresión (horas)", min_value=0.1, value=14.0, step=0.1)
+    num_placas = st.number_input("Número de placas", min_value=1, value=2)
+
+with col2:
+    peso_total = st.number_input("Peso TOTAL filamento (gramos)", min_value=1.0, value=6.0, step=1.0)
+    multicolor = st.checkbox("Es impresión multicolor", value=True)
+
+# Materiales (puedes agregar más)
+material = st.selectbox("Material principal", [
     "Creality PLA - Negro",
     "Mexico Maker PLA PRO - Azul Talavera",
-    "Mexico Maker PLA MATTE - Negro Carbon"
+    "Mexico Maker PLA MATTE - Negro Carbon",
+    "Mexico Maker PLA FLEX - Naranja",
+    "Mexico Maker PETG - Negro"
 ])
 
 precio_kg = 399 if "Creality" in material else 460
 
+# ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
-    costo_mat = (peso / 1000) * precio_kg
-    costo_elec = tiempo * (consumo / 1000) * costo_electricidad
-    costo_maquina_total = tiempo * costo_maquina
-    costo_mano = tiempo * costo_mano_obra
+    costo_material = (peso_total / 1000) * precio_kg
+    costo_electricidad_total = tiempo_impresion * (consumo / 1000) * costo_electricidad
+    costo_maquina_total = tiempo_impresion * costo_maquina_hora
+    costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
     
-    subtotal = costo_mat + costo_elec + costo_maquina_total + costo_mano
-    subtotal_falla = subtotal * (1 + margen_falla)
+    subtotal = costo_material + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
+    subtotal_con_falla = subtotal * (1 + margen_falla)
     
-    precio_final = subtotal_falla / (1 - margen_ganancia) * (1 + iva)
+    precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
     
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
     
-    st.write("### Desglose:")
-    st.write(f"Material: ${costo_mat:,.2f}")
-    st.write(f"Electricidad: ${costo_elec:,.2f}")
-    st.write(f"Máquina: ${costo_maquina_total:,.2f}")
-    st.write(f"Mano de obra: ${costo_mano:,.2f}")
+    st.divider()
+    st.write("### 📊 Desglose detallado:")
+    st.write(f"**Material:** ${costo_material:,.2f}")
+    st.write(f"**Electricidad:** ${costo_electricidad_total:,.2f}")
+    st.write(f"**Máquina:** ${costo_maquina_total:,.2f}")
+    if aplicar_mano_obra:
+        st.write(f"**Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
+    st.write(f"**Subtotal + Falla:** ${subtotal_con_falla:,.2f}")
+    if aplicar_iva:
+        st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
 
-st.caption("Calculadora personalizada para tus impresiones 3D")
+st.caption("Calculadora personalizada para tus impresiones 3D © 2026")
