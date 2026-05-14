@@ -93,7 +93,41 @@ if multiples_impresiones:
             minutos = st.number_input(f"Minutos impresión {i+1}", min_value=0, max_value=59, value=None, step=1, key=f"min_{i}", placeholder="0")
         tiempo_total += (horas or 0) + ((minutos or 0) / 60)
 else:
-    tiempo_impresion = st.number_input("Tiempo total de impresión (horas)", min_value=0.0, value=None, step=0.1, placeholder="0.0")
-    tiempo_total = tiempo_impresion if tiempo_impresion is not None else 0.0
+    st.subheader("Tiempo de impresión")
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        horas = st.number_input("Horas", min_value=0, value=None, step=1, placeholder="0")
+    with col2:
+        minutos = st.number_input("Minutos", min_value=0, max_value=59, value=None, step=1, placeholder="0")
+    tiempo_total = (horas or 0) + ((minutos or 0) / 60)
 
 num_placas = st.number_input("Número de placas", min_value=1, value=None, step=1, placeholder="1")
+
+# ==================== CÁLCULO ====================
+if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
+    
+    costo_material = (peso_total / 1000) * precio_kg
+    costo_electricidad_total = tiempo_total * (consumo / 1000) * costo_electricidad
+    costo_maquina_total = tiempo_total * costo_maquina_hora
+    costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
+   
+    subtotal = costo_material + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
+    subtotal_con_falla = subtotal * (1 + margen_falla)
+    precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
+   
+    st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
+   
+    st.divider()
+    st.write("### 📊 Desglose detallado:")
+    st.write(f"**Material:** ${costo_material:,.2f} ({peso_total}g)")
+    st.write(f"**Tiempo total:** {tiempo_total:.2f} horas")
+    st.write(f"**Electricidad:** ${costo_electricidad_total:,.2f}")
+    st.write(f"**Máquina:** ${costo_maquina_total:,.2f}")
+    if aplicar_mano_obra:
+        st.write(f"**Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
+    st.write(f"**Subtotal + Falla:** ${subtotal_con_falla:,.2f}")
+    if aplicar_iva:
+        st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
+
+st.caption("Calculadora 3D © 2026")
+st.caption("Powered by Mini Prints")
