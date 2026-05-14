@@ -7,33 +7,24 @@ st.title("Calculadora de precios")
 # ==================== CONFIGURACIÓN ====================
 st.sidebar.header("⚙️ Configuración")
 
-# Valores FIJOS
-st.sidebar.metric("💡 Costo electricidad kWh", "5.00 MXN")
-costo_electricidad = 5.00
+# Mano de Obra Opcional
+aplicar_mano_obra = st.sidebar.checkbox("¿Aplicar costo de mano de obra?", value=True)
 
-st.sidebar.metric("🛠️ Margen de falla", "10 %")
-margen_falla = 0.10
+if aplicar_mano_obra:
+    costo_mano_obra_hora = st.sidebar.number_input("Costo mano de obra por hora ($)", value=20.0, step=5.0, min_value=0.0)
+    horas_mano_obra = st.sidebar.number_input("Horas de mano de obra", value=2.0, step=0.5, min_value=0.0)
+else:
+    costo_mano_obra_hora = 0.0
+    horas_mano_obra = 0.0
 
-# Valores editables
-costo_mano_obra = st.sidebar.number_input("Costo mano de obra / hora ($)", value=20.0, step=5.0, min_value=0.0)
-
+# Margen de Ganancia (editable y permite >100%)
 margen_ganancia = st.sidebar.number_input(
     "Margen de ganancia deseado (%)", 
     value=65.0, 
     step=5.0, 
     min_value=0.0, 
-    max_value=500.0   # Permite más del 100%
+    max_value=500.0
 ) / 100
-
-# Checkbox para IVA
-aplicar_iva = st.sidebar.checkbox("¿Aplicar IVA (16%)?", value=True)
-iva = 0.16 if aplicar_iva else 0.0
-
-# Mostrar el IVA aplicado
-if aplicar_iva:
-    st.sidebar.metric("📌 IVA aplicado", "16 %")
-else:
-    st.sidebar.metric("📌 IVA aplicado", "0 %")
 
 impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
 if impresora == "A1 MINI":
@@ -42,6 +33,22 @@ if impresora == "A1 MINI":
 else:
     consumo = 350
     costo_maquina = 18
+
+# IVA con checkbox
+aplicar_iva = st.sidebar.checkbox("¿Aplicar IVA (16%)?", value=True)
+iva = 0.16 if aplicar_iva else 0.0
+
+if aplicar_iva:
+    st.sidebar.metric("📌 IVA aplicado", "16 %")
+else:
+    st.sidebar.metric("📌 IVA aplicado", "0 %")
+    
+# Valores FIJOS
+st.sidebar.metric("💡 Costo electricidad kWh", "5.00 MXN")
+costo_electricidad = 5.00
+
+st.sidebar.metric("🛠️ Margen de falla", "10 %")
+margen_falla = 0.10
 
 # Datos de la impresión
 st.header("📋 Información")
