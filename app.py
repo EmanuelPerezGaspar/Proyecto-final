@@ -146,30 +146,24 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
-    st.write("### 🧵 Materiales utilizados:")
-    
+    # Cálculos
     if es_multicolor:
         costo_material_total = 0.0
+        detalles_materiales = []
         for i in range(num_materiales):
-            mat_nombre = st.session_state.materiales.get(mat, 400)  # Corrección aquí
-            # Usamos la variable correcta del loop
             mat_key = f"mat_{i}"
             peso_key = f"peso_{i}"
-            
-            # Obtenemos el material y peso real
             material_actual = st.session_state.get(mat_key, "Desconocido")
             peso_actual = st.session_state.get(peso_key, 0)
-            
             precio_actual = st.session_state.materiales.get(material_actual, 400)
             costo_individual = (peso_actual / 1000) * precio_actual
             costo_material_total += costo_individual
             
-            st.write(f"**Material {i+1}:** {material_actual} → {peso_actual}g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
+            detalles_materiales.append(f"**Material {i+1}:** {material_actual} → {peso_actual}g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
     else:
         costo_material_total = (peso_total / 1000) * precio_kg
-        st.write(f"**Material:** {material} → {peso_total}g × ${precio_kg}/kg = **${costo_material_total:,.2f}**")
+        detalles_materiales = [f"**Material:** {material} → {peso_total}g × ${precio_kg}/kg = **${costo_material_total:,.2f}**"]
 
-    # Resto de costos
     costo_electricidad_total = tiempo_total * (consumo / 1000) * costo_electricidad
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
@@ -178,15 +172,29 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     subtotal_con_falla = subtotal * (1 + margen_falla)
     precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
    
+    # Resultado Principal
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
    
     st.divider()
+    
+    # ==================== DESGLOSE GENERAL ====================
     st.write("### 📊 Desglose general:")
+    
+    # Detalle de Materiales (dentro del desglose)
+    for detalle in detalles_materiales:
+        st.write(detalle)
+    
     st.write(f"**Costo Total Material:** ${costo_material_total:,.2f}")
     st.write(f"**Electricidad:** ${costo_electricidad_total:,.2f}")
     st.write(f"**Máquina:** ${costo_maquina_total:,.2f}")
+    
     if aplicar_mano_obra:
         st.write(f"**Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
+    
     st.write(f"**Subtotal + Falla (10%):** ${subtotal_con_falla:,.2f}")
+    
     if aplicar_iva:
         st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
+
+st.caption("Calculadora 3D © 2026")
+st.caption("Powered by Mini Prints")
