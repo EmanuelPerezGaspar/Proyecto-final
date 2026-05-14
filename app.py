@@ -43,14 +43,14 @@ else:
     costo_mano_obra_hora = 0.0
     horas_mano_obra = 0.0
 
-# IVA con checkbox
+# IVA con checkbox (solo se muestra cuando está activado)
 aplicar_iva = st.sidebar.checkbox("¿Aplicar IVA (16%)?", value=True)
-iva = 0.16 if aplicar_iva else 0.0
 
 if aplicar_iva:
     st.sidebar.metric("📌 IVA aplicado", "16 %")
+    iva = 0.16
 else:
-    st.sidebar.metric("📌 IVA aplicado", "0 %")
+    iva = 0.0
 
 
 # ==================== DATOS DE LA IMPRESIÓN ====================
@@ -104,4 +104,5 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     if aplicar_iva:
         st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
 
-st.caption("Calculadora personalizada para tus impresiones 3D © 2026")
+st.caption("Calculadora 3D © 2026")
+st.caption("Powered by MINIPRINTS")
