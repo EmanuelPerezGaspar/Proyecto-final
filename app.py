@@ -158,7 +158,6 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             precio_actual = st.session_state.materiales.get(material_actual, 400)
             costo_individual = (peso_actual / 1000) * precio_actual
             costo_material_total += costo_individual
-            
             detalles_materiales.append(f"**Material {i+1}:** {material_actual} → {peso_actual}g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
     else:
         costo_material_total = (peso_total / 1000) * precio_kg
@@ -172,15 +171,12 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     subtotal_con_falla = subtotal * (1 + margen_falla)
     precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
    
-    # Resultado Principal
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
    
     st.divider()
-    
-    # ==================== DESGLOSE GENERAL ====================
     st.write("### 📊 Desglose general:")
     
-    # Detalle de Materiales (dentro del desglose)
+    # Detalle de materiales
     for detalle in detalles_materiales:
         st.write(detalle)
     
@@ -193,47 +189,8 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     
     st.write(f"**Subtotal + Falla (10%):** ${subtotal_con_falla:,.2f}")
     
-       if aplicar_iva:
+    if aplicar_iva:
         st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
-
-    # ==================== COMPARTIR ====================
-    st.divider()
-    st.write("### 📤 Compartir Cotización")
-
-    # Crear texto para compartir
-    resumen = f"""Cotización Mini Prints
-
-Cliente / Modelo: {cliente}
-Tiempo total: {tiempo_total:.2f} horas
-Peso total: {peso_total}g
-"""
-
-    if es_multicolor:
-        for i in range(num_materiales):
-            mat_key = f"mat_{i}"
-            peso_key = f"peso_{i}"
-            mat = st.session_state.get(mat_key, "Desconocido")
-            peso = st.session_state.get(peso_key, 0)
-            resumen += f"- {mat}: {peso}g\n"
-    else:
-        resumen += f"- {material}: {peso_total}g\n"
-
-    resumen += f"""
-Precio Final: ${precio_final:,.2f} MXN
-"""
-
-    col_share1, col_share2 = st.columns(2)
-    with col_share1:
-        if st.button("📱 Compartir por WhatsApp", use_container_width=True):
-            import urllib.parse
-            mensaje = urllib.parse.quote(resumen)
-            whatsapp_url = f"https://wa.me/?text={mensaje}"
-            st.markdown(f"[Abrir WhatsApp con esta cotización]({whatsapp_url})", unsafe_allow_html=True)
-
-    with col_share2:
-        if st.button("📋 Copiar Resumen", use_container_width=True):
-            st.code(resumen, language=None)
-            st.success("✅ Resumen copiado al portapapeles. Pégalo en WhatsApp o correo.")
 
 st.caption("Calculadora 3D © 2026")
 st.caption("Powered by Mini Prints")
