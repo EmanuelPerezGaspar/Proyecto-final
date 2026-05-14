@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="Calculadora 3D Emanuel", layout="centered")
+st.set_page_config(page_title="Calculadora 3D", layout="centered")
 
 st.title("🖨️ Calculadora de Precios 3D")
 st.subheader("Emanuel Pérez - Impresiones 3D")
