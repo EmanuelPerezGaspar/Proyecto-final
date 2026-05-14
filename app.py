@@ -58,16 +58,15 @@ st.header("📋 Datos de la impresión")
 
 cliente = st.text_input("Cliente / Modelo", "Emanuel")
 
-# Multicolor
 es_multicolor = st.checkbox("¿Es impresión multicolor?", value=False)
 
-# ==================== MATERIALES DINÁMICOS ====================
-materiales_usados = []
-pesos_usados = []
-
+# ==================== MATERIALES ====================
 if es_multicolor:
     st.subheader("Materiales (hasta 6)")
     num_materiales = st.slider("Cantidad de materiales diferentes", min_value=1, max_value=6, value=3)
+    
+    materiales_usados = []
+    pesos_usados = []
     
     for i in range(num_materiales):
         col1, col2 = st.columns([3, 1])
@@ -77,16 +76,19 @@ if es_multicolor:
                 "Mexico Maker PLA PRO - Azul Talavera",
                 "Mexico Maker PLA MATTE - Negro Carbon",
                 "Mexico Maker PLA FLEX - Naranja",
-                "Mexico Maker PETG - Negro",
-                "Otro"
+                "Mexico Maker PETG - Negro"
             ], key=f"mat_{i}")
         with col2:
             peso = st.number_input(f"Gramos {i+1}", min_value=0.0, value=20.0, step=1.0, key=f"peso_{i}")
         
         materiales_usados.append(mat)
         pesos_usados.append(peso)
+    
+    peso_total = sum(pesos_usados)
+    precio_kg = 430  # Promedio temporal (puedes mejorarlo después)
+
 else:
-    # Un solo material
+    # Formato simple cuando NO es multicolor
     material = st.selectbox("Material principal", [
         "Creality PLA - Negro",
         "Mexico Maker PLA PRO - Azul Talavera",
@@ -95,8 +97,9 @@ else:
         "Mexico Maker PETG - Negro"
     ])
     peso_total = st.number_input("Peso TOTAL filamento (gramos)", min_value=1.0, value=6.0, step=1.0)
+    precio_kg = 399 if "Creality" in material else 460
 
-# ==================== RESTO DE CAMPOS ====================
+# Resto de campos
 col1, col2 = st.columns(2)
 with col1:
     tiempo_impresion = st.number_input("Tiempo total de impresión (horas)", min_value=0.1, value=14.0, step=0.1)
@@ -104,14 +107,6 @@ with col1:
 
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
-    
-    if es_multicolor:
-        # Sumar pesos y calcular costo promedio (simple)
-        peso_total = sum(pesos_usados)
-        # Por simplicidad usamos precio promedio (puedes mejorarlo después)
-        precio_kg = 430  # Promedio aproximado
-    else:
-        precio_kg = 399 if "Creality" in material else 460
     
     costo_material = (peso_total / 1000) * precio_kg
     costo_electricidad_total = tiempo_impresion * (consumo / 1000) * costo_electricidad
