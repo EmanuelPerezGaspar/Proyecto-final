@@ -146,21 +146,30 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
-    # --- Cálculo de Material ---
+    st.write("### 🧵 Materiales utilizados:")
+    
     if es_multicolor:
         costo_material_total = 0.0
-        st.write("### 🧵 Materiales utilizados:")
         for i in range(num_materiales):
-            mat = st.session_state.materiales.get(mat, 400)  # Corrección: usar el material correcto
-            costo_individual = (pesos_usados[i] / 1000) * st.session_state.materiales.get(mat, 400)
+            mat_nombre = st.session_state.materiales.get(mat, 400)  # Corrección aquí
+            # Usamos la variable correcta del loop
+            mat_key = f"mat_{i}"
+            peso_key = f"peso_{i}"
+            
+            # Obtenemos el material y peso real
+            material_actual = st.session_state.get(mat_key, "Desconocido")
+            peso_actual = st.session_state.get(peso_key, 0)
+            
+            precio_actual = st.session_state.materiales.get(material_actual, 400)
+            costo_individual = (peso_actual / 1000) * precio_actual
             costo_material_total += costo_individual
-            st.write(f"**Material {i+1}:** {mat} → {pesos_usados[i]}g × ${st.session_state.materiales.get(mat, 400)}/kg = **${costo_individual:,.2f}**")
+            
+            st.write(f"**Material {i+1}:** {material_actual} → {peso_actual}g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
     else:
         costo_material_total = (peso_total / 1000) * precio_kg
-        st.write(f"### 🧵 Material utilizado:")
-        st.write(f"**{material}** → {peso_total}g × ${precio_kg}/kg = **${costo_material_total:,.2f}**")
+        st.write(f"**Material:** {material} → {peso_total}g × ${precio_kg}/kg = **${costo_material_total:,.2f}**")
 
-    # --- Resto de costos ---
+    # Resto de costos
     costo_electricidad_total = tiempo_total * (consumo / 1000) * costo_electricidad
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
@@ -172,17 +181,12 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
    
     st.divider()
-    st.write("### 📊 Desglose detallado:")
-    
-    st.write(f"**Material total:** ${costo_material_total:,.2f}")
+    st.write("### 📊 Desglose general:")
+    st.write(f"**Costo Total Material:** ${costo_material_total:,.2f}")
     st.write(f"**Electricidad:** ${costo_electricidad_total:,.2f}")
     st.write(f"**Máquina:** ${costo_maquina_total:,.2f}")
     if aplicar_mano_obra:
         st.write(f"**Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
     st.write(f"**Subtotal + Falla (10%):** ${subtotal_con_falla:,.2f}")
-    
     if aplicar_iva:
         st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
-
-st.caption("Calculadora 3D © 2026")
-st.caption("Powered by Mini Prints")
