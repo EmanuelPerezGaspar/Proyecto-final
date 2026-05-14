@@ -2,11 +2,10 @@ import streamlit as st
 
 st.set_page_config(page_title="Calculadora 3D", layout="centered")
 
-st.title("🖨️ Calculadora de Precios 3D")
-st.subheader("Emanuel Pérez - Impresiones 3D")
+st.title("Calculadora de precios")
 
 # Configuración
-st.sidebar.header("⚙️ Configuración")
+st.sidebar.header("⚙️ Configuración tecnica")
 
 costo_electricidad = st.sidebar.number_input("Costo electricidad kWh", value=5.0, step=0.1)
 costo_mano_obra = st.sidebar.number_input("Costo mano de obra / hora", value=20.0, step=5.0)
@@ -24,13 +23,13 @@ else:
     costo_maquina = 18
 
 # Datos de la impresión
-st.header("📋 Datos de la impresión")
+st.header("📋 Información")
 
-cliente = st.text_input("Cliente / Pedido", "Emanuel")
-tiempo = st.number_input("Tiempo total (horas)", min_value=0.1, value=14.0, step=0.1)
-peso = st.number_input("Peso TOTAL filamento (g)", min_value=1.0, value=6.0, step=1.0)
+cliente = st.text_input("Cliente / Modelo", "Cliente / Pedido")
+tiempo = st.number_input("Tiempo de impresión (horas)", min_value=0.1, value=14.0, step=0.1)
+peso = st.number_input("Filamento usado (g)", min_value=1.0, value=6.0, step=1.0)
 
-material = st.selectbox("Material", [
+material = st.selectbox("Filamento", [
     "Creality PLA - Negro",
     "Mexico Maker PLA PRO - Azul Talavera",
     "Mexico Maker PLA MATTE - Negro Carbon"
