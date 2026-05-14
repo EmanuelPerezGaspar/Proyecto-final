@@ -6,7 +6,10 @@ st.title("🖨️ Mini Prints")
 # ==================== CONFIGURACIÓN (SIDEBAR) ====================
 st.sidebar.header("⚙️ Parametros básicos")
 
-margen_ganancia = st.sidebar.number_input("Margen de ganancia deseado (%)", value=65.0, step=5.0, min_value=0.0, max_value=500.0) / 100
+margen_ganancia = st.sidebar.number_input(
+    "Margen de ganancia deseado (%)",
+    value=65.0, step=5.0, min_value=0.0, max_value=500.0
+) / 100
 
 impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
 if impresora == "A1 MINI":
@@ -44,14 +47,13 @@ cliente = st.text_input("Cliente / Modelo", "Emanuel")
 
 es_multicolor = st.checkbox("¿Es impresión multicolor?", value=False)
 
-# ==================== SECCIÓN DE MATERIALES (estable) ====================
+# ==================== MATERIALES ====================
 if es_multicolor:
     st.subheader("Materiales (hasta 6)")
     num_materiales = st.slider("Cantidad de materiales diferentes", 1, 6, 3)
-    
-    total_peso = 0
+    peso_total = 0.0
     for i in range(num_materiales):
-        col1, col2 = st.columns([3,1])
+        col1, col2 = st.columns([3, 1])
         with col1:
             mat = st.selectbox(f"Material {i+1}", [
                 "Creality PLA - Negro", "Mexico Maker PLA PRO - Azul Talavera",
@@ -60,24 +62,23 @@ if es_multicolor:
             ], key=f"mat_{i}")
         with col2:
             peso = st.number_input(f"Gramos {i+1}", min_value=0.0, value=20.0, step=1.0, key=f"peso_{i}")
-        total_peso += peso
-    peso_total = total_peso
-    precio_kg = 430  # Promedio
+        peso_total += peso
+    precio_kg = 430
 
 else:
-    # Formato limpio cuando NO es multicolor
-    col1, col2 = st.columns([3,1])
-    with col1:
+    # === Formato limpio cuando NO es multicolor ===
+    col_mat, col_peso = st.columns([3, 2])
+    with col_mat:
         material = st.selectbox("Material principal", [
             "Creality PLA - Negro", "Mexico Maker PLA PRO - Azul Talavera",
             "Mexico Maker PLA MATTE - Negro Carbon", "Mexico Maker PLA FLEX - Naranja",
             "Mexico Maker PETG - Negro"
         ])
-    with col2:
+    with col_peso:
         peso_total = st.number_input("Peso TOTAL filamento (gramos)", min_value=1.0, value=6.0, step=1.0)
     precio_kg = 399 if "Creality" in material else 460
 
-# Resto de campos
+# ==================== OTROS CAMPOS ====================
 col1, col2 = st.columns(2)
 with col1:
     tiempo_impresion = st.number_input("Tiempo total de impresión (horas)", min_value=0.1, value=14.0, step=0.1)
