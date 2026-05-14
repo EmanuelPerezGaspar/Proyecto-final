@@ -118,11 +118,11 @@ else:
     precio_kg = st.session_state.materiales.get(material, 400)
 
 # ==================== TIEMPO DE IMPRESIÓN ====================
- st.subheader("Tiempos por impresión")
+
 multiples_impresiones = st.checkbox("¿La impresión consta de más de una impresión?", value=False)
 
 if multiples_impresiones:
-   
+    st.subheader("Tiempos por impresión")
     num_impresiones = st.slider("Cantidad de impresiones", min_value=2, max_value=10, value=2)
     tiempo_total = 0.0
     for i in range(num_impresiones):
