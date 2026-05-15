@@ -144,6 +144,7 @@ else:
 num_placas = st.number_input("Número de placas", min_value=1, value=None, step=1, placeholder="1")
 
 # ==================== CÁLCULO ====================
+# ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
     # Cálculos
