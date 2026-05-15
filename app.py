@@ -185,6 +185,7 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     if aplicar_iva:
         st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
 
+    st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
     # Compartir
     st.divider()
     st.write("### 📤 Compartir Cotización")
