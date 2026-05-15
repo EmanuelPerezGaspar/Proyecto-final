@@ -144,9 +144,10 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
+    # --- Cálculo y tabla de materiales ---
     if es_multicolor:
+        data_materiales = []
         costo_material_total = 0.0
-        detalles_materiales = []
         for i in range(num_materiales):
             mat_key = f"mat_{i}"
             peso_key = f"peso_{i}"
@@ -155,11 +156,23 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             precio_actual = st.session_state.materiales.get(material_actual, 400)
             costo_individual = (peso_actual / 1000) * precio_actual
             costo_material_total += costo_individual
-            detalles_materiales.append(f"**Material {i+1}:** {material_actual} → {peso_actual}g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
+            
+            data_materiales.append({
+                "Material": material_actual,
+                "Gramaje (g)": peso_actual,
+                "Precio/kg": f"${precio_actual}",
+                "Costo": f"${costo_individual:,.2f}"
+            })
     else:
         costo_material_total = (peso_total / 1000) * precio_kg
-        detalles_materiales = [f"**Material:** {material} → {peso_total}g × ${precio_kg}/kg = **${costo_material_total:,.2f}**"]
+        data_materiales = [{
+            "Material": material,
+            "Gramaje (g)": peso_total,
+            "Precio/kg": f"${precio_kg}",
+            "Costo": f"${costo_material_total:,.2f}"
+        }]
 
+    # --- Resto de cálculos ---
     costo_electricidad_total = tiempo_total * (consumo / 1000) * costo_electricidad
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
@@ -167,25 +180,38 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     subtotal = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
     subtotal_con_falla = subtotal * (1 + margen_falla)
     precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
-   
-      
-    st.divider()
-    st.write("### 📊 Desglose general:")
-    
-    st.write("**🧵 Materiales utilizados:**")
-    for detalle in detalles_materiales:
-        st.write(detalle)
-    
-    st.write(f"**Costo Total de Materiales:** ${costo_material_total:,.2f}")
-    st.write(f"**Electricidad:** ${costo_electricidad_total:,.2f}")
-    st.write(f"**Máquina:** ${costo_maquina_total:,.2f}")
-    if aplicar_mano_obra and costo_mano_obra_total > 0:
-        st.write(f"**Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
-    st.write(f"**Subtotal + Falla (10%):** ${subtotal_con_falla:,.2f}")
-    if aplicar_iva:
-        st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
 
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
+   
+    st.divider()
+    
+    # ==================== DESGLOSE GENERAL CON TABLA ====================
+    st.write("### 📊 Desglose general:")
+    
+    # Tabla de Materiales
+    import pandas as pd
+    df_materiales = pd.DataFrame(data_materiales)
+    st.write("**🧵 Materiales utilizados:**")
+    st.dataframe(df_materiales, use_container_width=True, hide_index=True)
+    
+    st.write(f"**Total Materiales:** **${costo_material_total:,.2f}**")
+    
+    st.write("**⚡ Otros costos:**")
+    st.write(f"• Electricidad → **${costo_electricidad_total:,.2f}**")
+    st.write(f"• Máquina → **${costo_maquina_total:,.2f}**")
+    if aplicar_mano_obra and costo_mano_obra_total > 0:
+        st.write(f"• Mano de obra → **${costo_mano_obra_total:,.2f}** ({horas_mano_obra} horas)")
+    
+    st.write("**────────────────────**")
+    st.write(f"**Subtotal + Falla (10%):** **${subtotal_con_falla:,.2f}**")
+    
+    if aplicar_iva:
+        st.write(f"**IVA (16%):** **${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}**")
+    
+    st.write("**────────────────────**")
+    st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
+
+
     # Compartir
     st.divider()
     st.write("### 📤 Compartir Cotización")
