@@ -33,21 +33,16 @@ if 'materiales' not in st.session_state:
 # ==================== CONFIGURACIÓN (SIDEBAR) ====================
 st.sidebar.header("⚙️ Parametros básicos")
 
-# Selección de impresora (primero)
 impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
-
-# ==================== DEPRESIACIÓN FIJA ====================
 if impresora == "A1 MINI":
-    precio_impresora = 14999
-    vida_util_horas = 6000
-else:  # A1
-    precio_impresora = 25000
-    vida_util_horas = 6000
+    consumo = 280
+    costo_maquina_hora = 14999 / 6000   # Fórmula de depreciación
+else:
+    consumo = 350
+    costo_maquina_hora = 25000 / 6000
 
-costo_maquina_hora = precio_impresora / vida_util_horas
 st.sidebar.metric("Costo por hora de máquina (desgaste)", f"${costo_maquina_hora:.2f}")
 
-# Resto de parámetros
 margen_ganancia = st.sidebar.number_input("Margen de ganancia deseado (%)", value=65.0, step=5.0, min_value=0.0, max_value=500.0) / 100
 
 aplicar_mano_obra = st.sidebar.checkbox("¿Aplicar costo de mano de obra?", value=True)
@@ -151,19 +146,6 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
-    # Aseguramos que tiempo_total siempre tenga valor
-    if multiples_impresiones:
-        tiempo_total = 0.0
-        for i in range(num_impresiones):
-            horas = st.session_state.get(f"horas_{i}", 0)
-            minutos = st.session_state.get(f"min_{i}", 0)
-            tiempo_total += (horas or 0) + ((minutos or 0) / 60)
-    else:
-        horas = st.session_state.get("horas", 0)
-        minutos = st.session_state.get("minutos", 0)
-        tiempo_total = (horas or 0) + ((minutos or 0) / 60)
-
-    # --- Materiales ---
     if es_multicolor:
         costo_material_total = 0.0
         detalles_materiales = []
@@ -180,11 +162,10 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
         costo_material_total = (peso_total / 1000) * precio_kg
         detalles_materiales = [f"**Material:** {material} → {peso_total}g × ${precio_kg}/kg = **${costo_material_total:,.2f}**"]
 
-    # --- Electricidad ---
+    # Electricidad
     kwh_consumidos = tiempo_total * (consumo / 1000)
     costo_electricidad_total = kwh_consumidos * costo_electricidad
 
-    # --- Máquina y Mano de Obra ---
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
    
