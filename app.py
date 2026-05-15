@@ -148,7 +148,7 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     
     if es_multicolor:
         costo_material_total = 0.0
-        st.write("### 🧵 Materiales utilizados:")
+        detalles_materiales = []
         for i in range(num_materiales):
             mat_key = f"mat_{i}"
             peso_key = f"peso_{i}"
@@ -157,14 +157,11 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             precio_actual = st.session_state.materiales.get(material_actual, 400)
             costo_individual = (peso_actual / 1000) * precio_actual
             costo_material_total += costo_individual
-            
-            st.write(f"**{material_actual}** → {peso_actual} g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
+            detalles_materiales.append(f"**Material {i+1}:** {material_actual} → {peso_actual}g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
     else:
         costo_material_total = (peso_total / 1000) * precio_kg
-        st.write("### 🧵 Material utilizado:")
-        st.write(f"**{material}** → {peso_total} g × ${precio_kg}/kg = **${costo_material_total:,.2f}**")
+        detalles_materiales = [f"**Material:** {material} → {peso_total}g × ${precio_kg}/kg = **${costo_material_total:,.2f}**"]
 
-    # Resto de cálculos
     costo_electricidad_total = tiempo_total * (consumo / 1000) * costo_electricidad
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
@@ -177,6 +174,11 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
    
     st.divider()
     st.write("### 📊 Desglose general:")
+    
+    # Materiales dentro del desglose general
+    st.write("**🧵 Materiales utilizados:**")
+    for detalle in detalles_materiales:
+        st.write(detalle)
     
     st.write(f"**Costo Total de Materiales:** ${costo_material_total:,.2f}")
     st.write(f"**Electricidad:** ${costo_electricidad_total:,.2f}")
