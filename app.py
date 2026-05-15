@@ -33,13 +33,29 @@ if 'materiales' not in st.session_state:
 # ==================== CONFIGURACIÓN (SIDEBAR) ====================
 st.sidebar.header("⚙️ Parametros básicos")
 
+# Datos de depreciación de impresoras
+st.sidebar.subheader("Depreciación de Impresoras")
+precio_a1_mini = st.sidebar.number_input("Precio de A1 Mini ($)", value=14999, step=100)
+vida_a1_mini = st.sidebar.number_input("Vida útil A1 Mini (horas)", value=6000, step=100)
+
+precio_a1 = st.sidebar.number_input("Precio de A1 ($)", value=25000, step=100)
+vida_a1 = st.sidebar.number_input("Vida útil A1 (horas)", value=6000, step=100)
+
+# Cálculo del costo por hora de máquina
+costo_maquina_a1_mini = precio_a1_mini / vida_a1_mini
+costo_maquina_a1 = precio_a1 / vida_a1
+
 impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
 if impresora == "A1 MINI":
     consumo = 280
-    costo_maquina_hora = 12
+    costo_maquina_hora = costo_maquina_a1_mini
 else:
     consumo = 350
-    costo_maquina_hora = 18
+    costo_maquina_hora = costo_maquina_a1
+
+st.sidebar.metric("Costo por hora de máquina", f"${costo_maquina_hora:.2f}")
+
+# ... (el resto de tu sidebar se mantiene igual)
 
 margen_ganancia = st.sidebar.number_input("Margen de ganancia deseado (%)", value=65.0, step=5.0, min_value=0.0, max_value=500.0) / 100
 
