@@ -186,21 +186,37 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     st.divider()
     
     # ==================== DESGLOSE GENERAL CON TABLA ====================
+        st.divider()
     st.write("### 📊 Desglose general:")
     
-    # Tabla de Materiales
-    import pandas as pd
-    df_materiales = pd.DataFrame(data_materiales)
-    st.write("**🧵 Materiales utilizados:**")
-    st.dataframe(df_materiales, use_container_width=True, hide_index=True)
+    # Materiales
+    st.write("**🧵 Costo de Materiales:**")
+    if es_multicolor:
+        for i in range(num_materiales):
+            mat_key = f"mat_{i}"
+            peso_key = f"peso_{i}"
+            material_actual = st.session_state.get(mat_key, "Desconocido")
+            peso_actual = st.session_state.get(peso_key, 0)
+            precio_actual = st.session_state.materiales.get(material_actual, 400)
+            costo_individual = (peso_actual / 1000) * precio_actual
+            st.write(f"   • {material_actual} → {peso_actual}g = **${costo_individual:,.2f}**")
+    else:
+        st.write(f"   • {material} → {peso_total}g = **${costo_material_total:,.2f}**")
     
     st.write(f"**Total Materiales:** **${costo_material_total:,.2f}**")
     
-    st.write("**⚡ Otros costos:**")
-    st.write(f"• Electricidad → **${costo_electricidad_total:,.2f}**")
-    st.write(f"• Máquina → **${costo_maquina_total:,.2f}**")
+    # ==================== NUEVA SECCIÓN DE ELECTRICIDAD Y MÁQUINA ====================
+    st.write("**⚡ Costo de Electricidad y Máquina:**")
+    
+    kwh_consumidos = tiempo_total * (consumo / 1000)
+    st.write(f"   • Consumo de la impresora: **{consumo} Watts**")
+    st.write(f"   • Tiempo total: **{tiempo_total:.2f} horas**")
+    st.write(f"   • Energía consumida: **{kwh_consumidos:.2f} kWh**")
+    st.write(f"   • Electricidad: {kwh_consumidos:.2f} kWh × ${costo_electricidad}/kWh = **${costo_electricidad_total:,.2f}**")
+    st.write(f"   • Costo por hora de máquina: **${costo_maquina_hora}** × {tiempo_total:.2f} h = **${costo_maquina_total:,.2f}**")
+    
     if aplicar_mano_obra and costo_mano_obra_total > 0:
-        st.write(f"• Mano de obra → **${costo_mano_obra_total:,.2f}** ({horas_mano_obra} horas)")
+        st.write(f"**👷 Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
     
     st.write("**────────────────────**")
     st.write(f"**Subtotal + Falla (10%):** **${subtotal_con_falla:,.2f}**")
@@ -210,7 +226,6 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     
     st.write("**────────────────────**")
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
-
 
     # Compartir
     st.divider()
