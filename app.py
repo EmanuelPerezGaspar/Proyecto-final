@@ -144,10 +144,10 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
-    # --- Cálculo y tabla de materiales ---
+    # --- Materiales ---
     if es_multicolor:
-        data_materiales = []
         costo_material_total = 0.0
+        detalles_materiales = []
         for i in range(num_materiales):
             mat_key = f"mat_{i}"
             peso_key = f"peso_{i}"
@@ -156,23 +156,12 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             precio_actual = st.session_state.materiales.get(material_actual, 400)
             costo_individual = (peso_actual / 1000) * precio_actual
             costo_material_total += costo_individual
-            
-            data_materiales.append({
-                "Material": material_actual,
-                "Gramaje (g)": peso_actual,
-                "Precio/kg": f"${precio_actual}",
-                "Costo": f"${costo_individual:,.2f}"
-            })
+            detalles_materiales.append(f"**Material {i+1}:** {material_actual} → {peso_actual}g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
     else:
         costo_material_total = (peso_total / 1000) * precio_kg
-        data_materiales = [{
-            "Material": material,
-            "Gramaje (g)": peso_total,
-            "Precio/kg": f"${precio_kg}",
-            "Costo": f"${costo_material_total:,.2f}"
-        }]
+        detalles_materiales = [f"**Material:** {material} → {peso_total}g × ${precio_kg}/kg = **${costo_material_total:,.2f}**"]
 
-    # --- Resto de cálculos ---
+    # --- Otros costos ---
     costo_electricidad_total = tiempo_total * (consumo / 1000) * costo_electricidad
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
@@ -180,57 +169,65 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     subtotal = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
     subtotal_con_falla = subtotal * (1 + margen_falla)
     precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
-
+   
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
    
     st.divider()
-    
-    # ==================== DESGLOSE GENERAL CON TABLA ====================
-        st.divider()
     st.write("### 📊 Desglose general:")
     
-    # Materiales
-    st.write("**🧵 Costo de Materiales:**")
-    if es_multicolor:
-        for i in range(num_materiales):
-            mat_key = f"mat_{i}"
-            peso_key = f"peso_{i}"
-            material_actual = st.session_state.get(mat_key, "Desconocido")
-            peso_actual = st.session_state.get(peso_key, 0)
-            precio_actual = st.session_state.materiales.get(material_actual, 400)
-            costo_individual = (peso_actual / 1000) * precio_actual
-            st.write(f"   • {material_actual} → {peso_actual}g = **${costo_individual:,.2f}**")
-    else:
-        st.write(f"   • {material} → {peso_total}g = **${costo_material_total:,.2f}**")
+    st.write("**🧵 Materiales utilizados:**")
+    for detalle in detalles_materiales:
+        st.write(detalle)
     
-    st.write(f"**Total Materiales:** **${costo_material_total:,.2f}**")
-    
-    # ==================== NUEVA SECCIÓN DE ELECTRICIDAD Y MÁQUINA ====================
-    st.write("**⚡ Costo de Electricidad y Máquina:**")
-    
-    kwh_consumidos = tiempo_total * (consumo / 1000)
-    st.write(f"   • Consumo de la impresora: **{consumo} Watts**")
-    st.write(f"   • Tiempo total: **{tiempo_total:.2f} horas**")
-    st.write(f"   • Energía consumida: **{kwh_consumidos:.2f} kWh**")
-    st.write(f"   • Electricidad: {kwh_consumidos:.2f} kWh × ${costo_electricidad}/kWh = **${costo_electricidad_total:,.2f}**")
-    st.write(f"   • Costo por hora de máquina: **${costo_maquina_hora}** × {tiempo_total:.2f} h = **${costo_maquina_total:,.2f}**")
+    st.write(f"**Costo Total de Materiales:** ${costo_material_total:,.2f}")
+    st.write(f"**Electricidad:** ${costo_electricidad_total:,.2f}")
+    st.write(f"**Máquina:** ${costo_maquina_total:,.2f}")
     
     if aplicar_mano_obra and costo_mano_obra_total > 0:
-        st.write(f"**👷 Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
+        st.write(f"**Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
     
     st.write("**────────────────────**")
     st.write(f"**Subtotal + Falla (10%):** **${subtotal_con_falla:,.2f}**")
     
     if aplicar_iva:
         st.write(f"**IVA (16%):** **${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}**")
-    
-    st.write("**────────────────────**")
-    st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
 
-    # Compartir
+    # ==================== COMPARTIR ====================
     st.divider()
     st.write("### 📤 Compartir Cotización")
-    # (Aquí puedes agregar el código de compartir cuando lo necesites)
+    
+    resumen = f"""Cotización Mini Prints
+
+Cliente / Modelo: {cliente}
+Tiempo total: {tiempo_total:.2f} horas
+Peso total: {peso_total}g
+
+Materiales:
+"""
+    if es_multicolor:
+        for i in range(num_materiales):
+            mat_key = f"mat_{i}"
+            peso_key = f"peso_{i}"
+            mat = st.session_state.get(mat_key, "Desconocido")
+            peso = st.session_state.get(peso_key, 0)
+            resumen += f"- {mat}: {peso}g\n"
+    else:
+        resumen += f"- {material}: {peso_total}g\n"
+
+    resumen += f"""
+Precio Final: ${precio_final:,.2f} MXN
+"""
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("📱 Compartir por WhatsApp", use_container_width=True):
+            import urllib.parse
+            mensaje = urllib.parse.quote(resumen)
+            st.markdown(f"[Abrir WhatsApp](https://wa.me/?text={mensaje})", unsafe_allow_html=True)
+    with col2:
+        if st.button("📋 Copiar Resumen", use_container_width=True):
+            st.code(resumen, language=None)
+            st.success("✅ Resumen copiado al portapapeles")
 
 st.caption("Calculadora 3D © 2026")
 st.caption("Powered by Mini Prints")
