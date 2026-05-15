@@ -151,6 +151,18 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
+    # Aseguramos que tiempo_total siempre exista
+    if multiples_impresiones:
+        tiempo_total = 0.0
+        for i in range(num_impresiones):
+            horas = st.session_state.get(f"horas_{i}", 0)
+            minutos = st.session_state.get(f"min_{i}", 0)
+            tiempo_total += (horas or 0) + ((minutos or 0) / 60)
+    else:
+        horas = st.session_state.get("horas", 0)
+        minutos = st.session_state.get("minutos", 0)
+        tiempo_total = (horas or 0) + ((minutos or 0) / 60)
+
     # --- Materiales ---
     if es_multicolor:
         costo_material_total = 0.0
@@ -191,7 +203,6 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     
     st.write(f"**Costo Total de Materiales:** ${costo_material_total:,.2f}")
     
-    # Electricidad con explicación
     st.write("**⚡ Costo de Electricidad:**")
     st.write(f"   • Consumo impresora: **{consumo} Watts**")
     st.write(f"   • Tiempo: **{tiempo_total:.2f} horas**")
