@@ -148,8 +148,8 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     
     # --- Materiales ---
     if es_multicolor:
-        data_materiales = []
         costo_material_total = 0.0
+        detalles_materiales = []
         for i in range(num_materiales):
             mat_key = f"mat_{i}"
             peso_key = f"peso_{i}"
@@ -158,8 +158,7 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             precio_actual = st.session_state.materiales.get(material_actual, 400)
             costo_individual = (peso_actual / 1000) * precio_actual
             costo_material_total += costo_individual
-            
-            data_materiales.append({
+            detalles_materiales.append({
                 "Material": material_actual,
                 "Gramaje (g)": peso_actual,
                 "Precio/kg ($)": precio_actual,
@@ -167,7 +166,7 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             })
     else:
         costo_material_total = (peso_total / 1000) * precio_kg
-        data_materiales = [{
+        detalles_materiales = [{
             "Material": material,
             "Gramaje (g)": peso_total,
             "Precio/kg ($)": precio_kg,
@@ -178,8 +177,10 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     kwh_consumidos = tiempo_total * (consumo / 1000)
     costo_electricidad_total = kwh_consumidos * costo_electricidad
 
-    # --- Otros costos ---
+    # --- Máquina ---
     costo_maquina_total = tiempo_total * costo_maquina_hora
+
+    # --- Mano de Obra ---
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
    
     subtotal = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
@@ -193,25 +194,28 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     
     # Tabla de Materiales
     import pandas as pd
-    df_materiales = pd.DataFrame(data_materiales)
     st.write("**🧵 Materiales utilizados:**")
-    st.dataframe(df_materiales, use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(detalles_materiales), use_container_width=True, hide_index=True)
     
-    st.write(f"**Total Materiales:** **${costo_material_total:,.2f}**")
-    
-    # Tabla / Detalle de Electricidad
+    # Tabla de Electricidad
     st.write("**⚡ Costo de Electricidad:**")
     data_elec = {
-        "Concepto": ["Consumo impresora", "Tiempo total", "Energía consumida", "Costo por kWh", "Costo total electricidad"],
+        "Concepto": ["Consumo impresora", "Tiempo total", "Energía consumida", "Costo por kWh", "Costo total"],
         "Valor": [f"{consumo} Watts", f"{tiempo_total:.2f} horas", f"{kwh_consumidos:.3f} kWh", f"${costo_electricidad}/kWh", f"${costo_electricidad_total:,.2f}"]
     }
     st.dataframe(pd.DataFrame(data_elec), use_container_width=True, hide_index=True)
     
-    # Resto de costos
-    st.write("**🔧 Otros costos:**")
-    st.write(f"• Máquina → **${costo_maquina_total:,.2f}**")
+    # Tabla de Máquina
+    st.write("**🔧 Costo de Máquina:**")
+    data_maquina = {
+        "Concepto": ["Costo por hora de máquina", "Tiempo total", "Costo total máquina"],
+        "Valor": [f"${costo_maquina_hora:.2f}/hora", f"{tiempo_total:.2f} horas", f"${costo_maquina_total:,.2f}"]
+    }
+    st.dataframe(pd.DataFrame(data_maquina), use_container_width=True, hide_index=True)
+    
+    # Mano de Obra
     if aplicar_mano_obra and costo_mano_obra_total > 0:
-        st.write(f"• Mano de obra → **${costo_mano_obra_total:,.2f}** ({horas_mano_obra} horas)")
+        st.write(f"**👷 Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
     
     st.write("**────────────────────**")
     st.write(f"**Subtotal + Falla (10%):** **${subtotal_con_falla:,.2f}**")
