@@ -33,8 +33,10 @@ if 'materiales' not in st.session_state:
 # ==================== CONFIGURACIÓN (SIDEBAR) ====================
 st.sidebar.header("⚙️ Parametros básicos")
 
-# ==================== DEPRESIACIÓN FIJA (NO SE MUESTRA) ====================
-# Datos fijos según tu impresora
+# Selección de impresora (primero)
+impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
+
+# ==================== DEPRESIACIÓN FIJA ====================
 if impresora == "A1 MINI":
     precio_impresora = 14999
     vida_util_horas = 6000
@@ -42,10 +44,7 @@ else:  # A1
     precio_impresora = 25000
     vida_util_horas = 6000
 
-# Fórmula que pediste:
 costo_maquina_hora = precio_impresora / vida_util_horas
-
-# Mostramos solo el resultado calculado
 st.sidebar.metric("Costo por hora de máquina (desgaste)", f"${costo_maquina_hora:.2f}")
 
 # Resto de parámetros
