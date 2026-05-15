@@ -146,7 +146,6 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
-    # Cálculos
     if es_multicolor:
         costo_material_total = 0.0
         detalles_materiales = []
@@ -170,51 +169,56 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     subtotal = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
     subtotal_con_falla = subtotal * (1 + margen_falla)
     precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
-   
+
+    # Guardamos los resultados para usarlos fuera del botón
+    st.session_state.ultima_cotizacion = {
+        "precio_final": precio_final,
+        "detalles_materiales": detalles_materiales,
+        "costo_material_total": costo_material_total,
+        "costo_electricidad_total": costo_electricidad_total,
+        "costo_maquina_total": costo_maquina_total,
+        "costo_mano_obra_total": costo_mano_obra_total,
+        "subtotal_con_falla": subtotal_con_falla,
+        "cliente": cliente,
+        "tiempo_total": tiempo_total,
+        "peso_total": peso_total
+    }
+
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
    
     st.divider()
     st.write("### 📊 Desglose general:")
-    
     for detalle in detalles_materiales:
         st.write(detalle)
     
     st.write(f"**Costo Total Material:** ${costo_material_total:,.2f}")
     st.write(f"**Electricidad:** ${costo_electricidad_total:,.2f}")
     st.write(f"**Máquina:** ${costo_maquina_total:,.2f}")
-    
     if aplicar_mano_obra:
         st.write(f"**Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
-    
     st.write(f"**Subtotal + Falla (10%):** ${subtotal_con_falla:,.2f}")
-    
     if aplicar_iva:
         st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
 
-    # ==================== COMPARTIR ====================
+# ==================== COMPARTIR (FUERA del botón de calcular) ====================
+if 'ultima_cotizacion' in st.session_state:
     st.divider()
     st.write("### 📤 Compartir Cotización")
-
+    
+    cot = st.session_state.ultima_cotizacion
     resumen = f"""Cotización Mini Prints
 
-Cliente / Modelo: {cliente}
-Tiempo total: {tiempo_total:.2f} horas
-Peso total: {peso_total}g
+Cliente / Modelo: {cot['cliente']}
+Tiempo total: {cot['tiempo_total']:.2f} horas
+Peso total: {cot['peso_total']}g
 
 Materiales:
 """
-    if es_multicolor:
-        for i in range(num_materiales):
-            mat_key = f"mat_{i}"
-            peso_key = f"peso_{i}"
-            mat = st.session_state.get(mat_key, "Desconocido")
-            peso = st.session_state.get(peso_key, 0)
-            resumen += f"- {mat}: {peso}g\n"
-    else:
-        resumen += f"- {material}: {peso_total}g\n"
+    for det in cot['detalles_materiales']:
+        resumen += f"{det}\n"
 
     resumen += f"""
-Precio Final: ${precio_final:,.2f} MXN
+Precio Final: ${cot['precio_final']:,.2f} MXN
 """
 
     col1, col2 = st.columns(2)
@@ -229,5 +233,4 @@ Precio Final: ${precio_final:,.2f} MXN
             st.code(resumen, language=None)
             st.success("✅ Resumen copiado al portapapeles")
 
-st.caption("Calculadora 3D © 2026")
-st.caption("Powered by Mini Prints")
+st.caption("Calculadora 3D © 2026 - by Mini Prints")
