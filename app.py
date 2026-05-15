@@ -146,7 +146,7 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
-    # === Cálculo de Materiales ===
+    # --- Materiales ---
     if es_multicolor:
         costo_material_total = 0.0
         st.write("### 🧵 Materiales utilizados:")
@@ -158,14 +158,13 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             precio_actual = st.session_state.materiales.get(material_actual, 400)
             costo_individual = (peso_actual / 1000) * precio_actual
             costo_material_total += costo_individual
-            
-            st.write(f"**• {material_actual}** → {peso_actual} g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
+            st.write(f"• **{material_actual}** → {peso_actual} g × ${precio_actual}/kg = **${costo_individual:,.2f}**")
     else:
         costo_material_total = (peso_total / 1000) * precio_kg
         st.write("### 🧵 Material utilizado:")
-        st.write(f"**• {material}** → {peso_total} g × ${precio_kg}/kg = **${costo_material_total:,.2f}**")
+        st.write(f"• **{material}** → {peso_total} g × ${precio_kg}/kg = **${costo_material_total:,.2f}**")
 
-    # === Otros costos ===
+    # --- Otros costos ---
     costo_electricidad_total = tiempo_total * (consumo / 1000) * costo_electricidad
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
@@ -190,17 +189,17 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             peso_actual = st.session_state.get(peso_key, 0)
             precio_actual = st.session_state.materiales.get(material_actual, 400)
             costo_individual = (peso_actual / 1000) * precio_actual
-            st.write(f"   • {material_actual}: {peso_actual}g → **${costo_individual:,.2f}**")
+            st.write(f"   • {material_actual} → {peso_actual}g = **${costo_individual:,.2f}**")
     else:
-        st.write(f"   • {material}: {peso_total}g → **${costo_material_total:,.2f}**")
+        st.write(f"   • {material} → {peso_total}g = **${costo_material_total:,.2f}**")
     
-    st.write(f"**Total Materiales:** ${costo_material_total:,.2f}")
+    st.write(f"**Total Materiales:** **${costo_material_total:,.2f}**")
     
     st.write("**⚡ Otros costos:**")
-    st.write(f"   • Electricidad: **${costo_electricidad_total:,.2f}**")
-    st.write(f"   • Máquina: **${costo_maquina_total:,.2f}**")
+    st.write(f"   • Electricidad → **${costo_electricidad_total:,.2f}**")
+    st.write(f"   • Máquina → **${costo_maquina_total:,.2f}**")
     if aplicar_mano_obra and costo_mano_obra_total > 0:
-        st.write(f"   • Mano de obra: **${costo_mano_obra_total:,.2f}** ({horas_mano_obra} horas)")
+        st.write(f"   • Mano de obra → **${costo_mano_obra_total:,.2f}** ({horas_mano_obra} horas)")
     
     st.write("**────────────────────**")
     st.write(f"**Subtotal + Falla (10%):** **${subtotal_con_falla:,.2f}**")
@@ -210,7 +209,6 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     
     st.write("**────────────────────**")
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
-
     # ==================== COMPARTIR ====================
     st.divider()
     st.write("### 📤 Compartir Cotización")
