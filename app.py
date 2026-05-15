@@ -151,7 +151,7 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
-    # Aseguramos que tiempo_total siempre exista
+    # Aseguramos que tiempo_total siempre tenga valor
     if multiples_impresiones:
         tiempo_total = 0.0
         for i in range(num_impresiones):
