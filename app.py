@@ -144,7 +144,6 @@ else:
 num_placas = st.number_input("Número de placas", min_value=1, value=None, step=1, placeholder="1")
 
 # ==================== CÁLCULO ====================
-# ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
     # Cálculos
@@ -177,7 +176,6 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     st.divider()
     st.write("### 📊 Desglose general:")
     
-    # Detalle de materiales
     for detalle in detalles_materiales:
         st.write(detalle)
     
@@ -192,6 +190,44 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     
     if aplicar_iva:
         st.write(f"**IVA (16%):** ${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}")
+
+    # ==================== COMPARTIR ====================
+    st.divider()
+    st.write("### 📤 Compartir Cotización")
+
+    resumen = f"""Cotización Mini Prints
+
+Cliente / Modelo: {cliente}
+Tiempo total: {tiempo_total:.2f} horas
+Peso total: {peso_total}g
+
+Materiales:
+"""
+    if es_multicolor:
+        for i in range(num_materiales):
+            mat_key = f"mat_{i}"
+            peso_key = f"peso_{i}"
+            mat = st.session_state.get(mat_key, "Desconocido")
+            peso = st.session_state.get(peso_key, 0)
+            resumen += f"- {mat}: {peso}g\n"
+    else:
+        resumen += f"- {material}: {peso_total}g\n"
+
+    resumen += f"""
+Precio Final: ${precio_final:,.2f} MXN
+"""
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("📱 Compartir por WhatsApp", use_container_width=True):
+            import urllib.parse
+            mensaje = urllib.parse.quote(resumen)
+            st.markdown(f"[Abrir WhatsApp](https://wa.me/?text={mensaje})", unsafe_allow_html=True)
+    
+    with col2:
+        if st.button("📋 Copiar Resumen", use_container_width=True):
+            st.code(resumen, language=None)
+            st.success("✅ Resumen copiado al portapapeles")
 
 st.caption("Calculadora 3D © 2026")
 st.caption("Powered by Mini Prints")
