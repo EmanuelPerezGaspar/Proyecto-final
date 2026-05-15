@@ -168,8 +168,7 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     subtotal_con_falla = subtotal * (1 + margen_falla)
     precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
    
-    st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
-   
+      
     st.divider()
     st.write("### 📊 Desglose general:")
     
