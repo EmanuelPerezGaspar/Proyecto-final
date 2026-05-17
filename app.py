@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import os
+import pandas as pd
 
 st.set_page_config(page_title="Calculadora de Precios", layout="centered")
 st.title("🖨️ Mini Prints")
@@ -36,7 +37,7 @@ st.sidebar.header("⚙️ Parametros básicos")
 impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
 if impresora == "A1 MINI":
     consumo = 280
-    costo_maquina_hora = 14999 / 6000   # Fórmula de depreciación
+    costo_maquina_hora = 14999 / 6000
 else:
     consumo = 350
     costo_maquina_hora = 25000 / 6000
@@ -65,29 +66,6 @@ costo_electricidad = 5.00
 
 st.sidebar.metric("🛠️ Margen de falla", "10 %")
 margen_falla = 0.10
-
-# Gestor de Materiales
-with st.sidebar.expander("➕ Agregar Nuevo Material"):
-    nuevo_nombre = st.text_input("Nombre completo del material")
-    nuevo_precio = st.number_input("Precio por kg ($)", min_value=0.0, value=350.0, step=10.0)
-    if st.button("Agregar Material"):
-        if nuevo_nombre.strip():
-            st.session_state.materiales[nuevo_nombre.strip()] = nuevo_precio
-            guardar_materiales(st.session_state.materiales)
-            st.success(f"✅ {nuevo_nombre} agregado")
-        else:
-            st.error("Escribe un nombre")
-
-with st.sidebar.expander("🗑️ Eliminar Material"):
-    if st.session_state.materiales:
-        material_a_eliminar = st.selectbox("Selecciona material a eliminar", options=list(st.session_state.materiales.keys()))
-        if st.button("Eliminar Material", type="secondary"):
-            if material_a_eliminar in st.session_state.materiales:
-                del st.session_state.materiales[material_a_eliminar]
-                guardar_materiales(st.session_state.materiales)
-                st.success(f"🗑️ {material_a_eliminar} eliminado")
-    else:
-        st.write("No hay materiales")
 
 # ==================== DATOS DE LA IMPRESIÓN ====================
 st.header("📋 Datos de la impresión")
@@ -146,7 +124,6 @@ num_placas = st.number_input("Número de placas", min_value=1, value=None, step=
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
-    # --- Materiales ---
     if es_multicolor:
         costo_material_total = 0.0
         detalles_materiales = []
@@ -173,54 +150,24 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             "Costo ($)": round(costo_material_total, 2)
         }]
 
-    # --- Otros costos ---
     costo_electricidad_total = tiempo_total * (consumo / 1000) * costo_electricidad
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
    
-    # COSTO DE PRODUCCIÓN
-    costo_produccion = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
-    costo_con_falla = costo_produccion * (1 + margen_falla)
-    
-    # GANANCIA
-    precio_sin_iva = costo_con_falla / (1 - margen_ganancia)
-    ganancia = precio_sin_iva - costo_con_falla
-    
-    # IVA
-    iva_monto = precio_sin_iva * iva
-    precio_final = precio_sin_iva + iva_monto
-
+    subtotal = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
+    subtotal_con_falla = subtotal * (1 + margen_falla)
+    precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
+   
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
    
     st.divider()
+    st.write("### 📊 Desglose general:")
     
-    # ==================== RESUMEN FINAL ====================
-    st.write("### 📊 Resumen Final")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.metric("**Costo de Producción**", f"${costo_produccion:,.2f}")
-        st.metric("**Ganancia**", f"${ganancia:,.2f} ({margen_ganancia*100:.0f}%)")
-    
-    with col2:
-        st.metric("**Subtotal + Falla**", f"${costo_con_falla:,.2f}")
-        if aplicar_iva:
-            st.metric("**IVA (16%)**", f"${iva_monto:,.2f}")
-        else:
-            st.metric("**IVA**", "$0.00")
-    
-    st.write("**────────────────────**")
-    st.success(f"**TOTAL A COBRAR: ${precio_final:,.2f} MXN**")
-
-    # ==================== DESGLOSE DETALLADO ====================
-    st.divider()
-    st.write("### 📋 Desglose Detallado")
-    
-    import pandas as pd
+    # Tabla Materiales
     st.write("**🧵 Materiales utilizados:**")
     st.dataframe(pd.DataFrame(detalles_materiales), use_container_width=True, hide_index=True)
     
+    # Tabla Electricidad
     st.write("**⚡ Costo de Electricidad:**")
     data_elec = {
         "Concepto": ["Consumo impresora", "Tiempo total", "Energía consumida", "Costo por kWh", "Costo total"],
@@ -228,10 +175,23 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     }
     st.dataframe(pd.DataFrame(data_elec), use_container_width=True, hide_index=True)
     
+    # Tabla Máquina
     st.write("**🔧 Costo de Máquina:**")
-    st.write(f"   • Costo por hora: **${costo_maquina_hora:.2f}**")
-    st.write(f"   • Tiempo total: **{tiempo_total:.2f} horas**")
-    st.write(f"   • Total Máquina: **${costo_maquina_total:,.2f}**")
+    data_maquina = {
+        "Concepto": ["Costo por hora", "Tiempo total", "Costo total máquina"],
+        "Valor": [f"${costo_maquina_hora:.2f}", f"{tiempo_total:.2f} horas", f"${costo_maquina_total:,.2f}"]
+    }
+    st.dataframe(pd.DataFrame(data_maquina), use_container_width=True, hide_index=True)
+    
+    # Mano de obra
+    if aplicar_mano_obra and costo_mano_obra_total > 0:
+        st.write(f"**👷 Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
+    
+    st.write("**────────────────────**")
+    st.write(f"**Subtotal + Falla (10%):** **${subtotal_con_falla:,.2f}**")
+    
+    if aplicar_iva:
+        st.write(f"**IVA (16%):** **${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}**")
 
 st.caption("Calculadora 3D © 2026")
 st.caption("Powered by Mini Prints")
