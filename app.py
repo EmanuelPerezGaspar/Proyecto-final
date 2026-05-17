@@ -226,5 +226,4 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     }
     st.dataframe(pd.DataFrame(data_maquina), use_container_width=True, hide_index=True)
 
-st.caption("Calculadora 3D © 2026")
-st.caption("Powered by Mini Prints")
+st.caption("Calculadora 3D © 2026 by Mini Prints")
