@@ -173,55 +173,65 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
             "Costo ($)": round(costo_material_total, 2)
         }]
 
-    # --- Electricidad ---
-    kwh_consumidos = tiempo_total * (consumo / 1000)
-    costo_electricidad_total = kwh_consumidos * costo_electricidad
-
-    # --- Máquina ---
+    # --- Otros costos ---
+    costo_electricidad_total = tiempo_total * (consumo / 1000) * costo_electricidad
     costo_maquina_total = tiempo_total * costo_maquina_hora
-
-    # --- Mano de Obra ---
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora
    
-    subtotal = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
-    subtotal_con_falla = subtotal * (1 + margen_falla)
-    precio_final = subtotal_con_falla / (1 - margen_ganancia) * (1 + iva)
-   
+    # COSTO DE PRODUCCIÓN
+    costo_produccion = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
+    costo_con_falla = costo_produccion * (1 + margen_falla)
+    
+    # GANANCIA
+    precio_sin_iva = costo_con_falla / (1 - margen_ganancia)
+    ganancia = precio_sin_iva - costo_con_falla
+    
+    # IVA
+    iva_monto = precio_sin_iva * iva
+    precio_final = precio_sin_iva + iva_monto
+
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
    
     st.divider()
-    st.write("### 📊 Desglose general:")
     
-    # Tabla de Materiales
+    # ==================== RESUMEN FINAL ====================
+    st.write("### 📊 Resumen Final")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.metric("**Costo de Producción**", f"${costo_produccion:,.2f}")
+        st.metric("**Ganancia**", f"${ganancia:,.2f} ({margen_ganancia*100:.0f}%)")
+    
+    with col2:
+        st.metric("**Subtotal + Falla**", f"${costo_con_falla:,.2f}")
+        if aplicar_iva:
+            st.metric("**IVA (16%)**", f"${iva_monto:,.2f}")
+        else:
+            st.metric("**IVA**", "$0.00")
+    
+    st.write("**────────────────────**")
+    st.success(f"**TOTAL A COBRAR: ${precio_final:,.2f} MXN**")
+
+    # ==================== DESGLOSE DETALLADO ====================
+    st.divider()
+    st.write("### 📋 Desglose Detallado")
+    
     import pandas as pd
     st.write("**🧵 Materiales utilizados:**")
     st.dataframe(pd.DataFrame(detalles_materiales), use_container_width=True, hide_index=True)
     
-    # Tabla de Electricidad
     st.write("**⚡ Costo de Electricidad:**")
     data_elec = {
         "Concepto": ["Consumo impresora", "Tiempo total", "Energía consumida", "Costo por kWh", "Costo total"],
-        "Valor": [f"{consumo} Watts", f"{tiempo_total:.2f} horas", f"{kwh_consumidos:.3f} kWh", f"${costo_electricidad}/kWh", f"${costo_electricidad_total:,.2f}"]
+        "Valor": [f"{consumo} Watts", f"{tiempo_total:.2f} h", f"{tiempo_total*(consumo/1000):.3f} kWh", f"${costo_electricidad}/kWh", f"${costo_electricidad_total:,.2f}"]
     }
     st.dataframe(pd.DataFrame(data_elec), use_container_width=True, hide_index=True)
     
-    # Tabla de Máquina
     st.write("**🔧 Costo de Máquina:**")
-    data_maquina = {
-        "Concepto": ["Costo por hora de máquina", "Tiempo total", "Costo total máquina"],
-        "Valor": [f"${costo_maquina_hora:.2f}/hora", f"{tiempo_total:.2f} horas", f"${costo_maquina_total:,.2f}"]
-    }
-    st.dataframe(pd.DataFrame(data_maquina), use_container_width=True, hide_index=True)
-    
-    # Mano de Obra
-    if aplicar_mano_obra and costo_mano_obra_total > 0:
-        st.write(f"**👷 Mano de obra:** ${costo_mano_obra_total:,.2f} ({horas_mano_obra} horas)")
-    
-    st.write("**────────────────────**")
-    st.write(f"**Subtotal + Falla (10%):** **${subtotal_con_falla:,.2f}**")
-    
-    if aplicar_iva:
-        st.write(f"**IVA (16%):** **${precio_final - (subtotal_con_falla / (1 - margen_ganancia)) :,.2f}**")
+    st.write(f"   • Costo por hora: **${costo_maquina_hora:.2f}**")
+    st.write(f"   • Tiempo total: **{tiempo_total:.2f} horas**")
+    st.write(f"   • Total Máquina: **${costo_maquina_total:,.2f}**")
 
 st.caption("Calculadora 3D © 2026")
 st.caption("Powered by Mini Prints")
