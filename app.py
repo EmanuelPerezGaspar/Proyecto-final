@@ -11,18 +11,19 @@ DATA_FILE = "materiales.json"
 
 def cargar_materiales():
     if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    else:
-        iniciales = {
-            "Creality PLA - Negro": 399,
-            "Mexico Maker PLA PRO - Azul Talavera": 399,
-            "Mexico Maker PLA MATTE - Negro Carbon": 460,
-            "Mexico Maker PLA FLEX - Naranja": 449,
-            "Mexico Maker PETG - Negro": 380,
-        }
-        guardar_materiales(iniciales)
-        return iniciales
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            pass
+    # Materiales por defecto (por si el json falla)
+    iniciales = {
+        "Creality PLA - Negro": 399,
+        "Creality PLA - Blanco": 399,
+        "Mexico Maker PETG - Negro": 380,
+    }
+    guardar_materiales(iniciales)
+    return iniciales
 
 def guardar_materiales(diccionario):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -56,7 +57,6 @@ else:
 
 aplicar_iva = st.sidebar.checkbox("¿Aplicar IVA (16%)?", value=True)
 if aplicar_iva:
-    st.sidebar.metric("📌 IVA aplicado", "16 %")
     iva = 0.16
 else:
     iva = 0.0
@@ -66,27 +66,6 @@ costo_electricidad = 5.00
 
 st.sidebar.metric("🛠️ Margen de falla", "10 %")
 margen_falla = 0.10
-
-# Gestor de Materiales
-with st.sidebar.expander("➕ Agregar Nuevo Material"):
-    nuevo_nombre = st.text_input("Nombre completo del material")
-    nuevo_precio = st.number_input("Precio por kg ($)", min_value=0.0, value=350.0, step=10.0)
-    if st.button("Agregar Material"):
-        if nuevo_nombre.strip():
-            st.session_state.materiales[nuevo_nombre.strip()] = nuevo_precio
-            guardar_materiales(st.session_state.materiales)
-            st.success(f"✅ {nuevo_nombre} agregado")
-        else:
-            st.error("Escribe un nombre")
-
-with st.sidebar.expander("🗑️ Eliminar Material"):
-    if st.session_state.materiales:
-        material_a_eliminar = st.selectbox("Selecciona material a eliminar", options=list(st.session_state.materiales.keys()))
-        if st.button("Eliminar Material", type="secondary"):
-            if material_a_eliminar in st.session_state.materiales:
-                del st.session_state.materiales[material_a_eliminar]
-                guardar_materiales(st.session_state.materiales)
-                st.success(f"🗑️ {material_a_eliminar} eliminado")
 
 # ==================== DATOS DE LA IMPRESIÓN ====================
 st.header("📋 Datos de la impresión")
@@ -110,14 +89,12 @@ if es_multicolor:
         with col2:
             peso = st.number_input(f"Gramos {i+1}", min_value=0.0, value=None, step=1.0, key=f"peso_{i}", placeholder="0.0")
         peso_total += peso if peso is not None else 0
-    precio_kg = 430
 else:
     col_mat, col_peso = st.columns([3, 2])
     with col_mat:
         material = st.selectbox("Material principal", materiales_lista)
     with col_peso:
         peso_total = st.number_input("Peso TOTAL filamento (gramos)", min_value=0.0, value=None, step=1.0, placeholder="0.0")
-    precio_kg = st.session_state.materiales.get(material, 400)
 
 # ==================== TIEMPO DE IMPRESIÓN ====================
 if multiples_impresiones:
@@ -140,8 +117,6 @@ else:
         minutos = st.number_input("Minutos", min_value=0, max_value=59, value=None, step=1, placeholder="0")
     tiempo_total = (horas or 0) + ((minutos or 0) / 60)
 
-num_placas = st.number_input("Número de placas", min_value=1, value=None, step=1, placeholder="1")
-
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
     
@@ -163,11 +138,11 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
                 "Costo ($)": round(costo_individual, 2)
             })
     else:
-        costo_material_total = (peso_total / 1000) * precio_kg
+        costo_material_total = (peso_total / 1000) * st.session_state.materiales.get(material, 400)
         detalles_materiales = [{
             "Material": material,
             "Gramaje (g)": peso_total,
-            "Precio/kg ($)": precio_kg,
+            "Precio/kg ($)": st.session_state.materiales.get(material, 400),
             "Costo ($)": round(costo_material_total, 2)
         }]
 
@@ -175,10 +150,8 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora if aplicar_mano_obra else 0
    
-    # === CÁLCULOS ===
     costo_produccion = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
     costo_con_falla = costo_produccion * (1 + margen_falla)
-    
     ganancia = costo_con_falla * margen_ganancia
     subtotal_con_ganancia = costo_con_falla + ganancia
     iva_monto = subtotal_con_ganancia * iva if aplicar_iva else 0
@@ -192,20 +165,14 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     st.write("### 📊 Resumen Final")
     
     col1, col2 = st.columns(2)
-    
     with col1:
         st.metric("**Costo de Producción**", f"${costo_produccion:,.2f}")
         st.caption("Material + Luz + Máquina + Mano de obra")
-        
         st.metric("**Ganancia**", f"${ganancia:,.2f} ({margen_ganancia*100:.0f}%)")
         st.caption(f"{margen_ganancia*100:.0f}% sobre (Costo + Falla)")
-
     with col2:
         st.metric("**Costo + Falla (10%)**", f"${costo_con_falla:,.2f}")
-        st.caption("Costo de producción × 1.10")
-        
         st.metric("**IVA**", f"${iva_monto:,.2f}" if aplicar_iva else "$0.00")
-        st.caption("16% sobre (Costo + Falla + Ganancia)" if aplicar_iva else "No se aplicó IVA")
 
     st.write("**────────────────────**")
     st.success(f"**TOTAL A COBRAR: ${precio_final:,.2f} MXN**")
@@ -231,4 +198,5 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     }
     st.dataframe(pd.DataFrame(data_maquina), use_container_width=True, hide_index=True)
 
-st.caption("Calculadora 3D © 2026 by Mini Prints")
+st.caption("Calculadora 3D © 2026")
+st.caption("Powered by Mini Prints")
