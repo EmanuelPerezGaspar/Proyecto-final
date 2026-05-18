@@ -175,15 +175,12 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora if aplicar_mano_obra else 0
    
-    # === CÁLCULOS CON TU LÓGICA ===
+    # === CÁLCULOS ===
     costo_produccion = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
     costo_con_falla = costo_produccion * (1 + margen_falla)
     
-    # Ganancia como % sobre el costo con falla
     ganancia = costo_con_falla * margen_ganancia
     subtotal_con_ganancia = costo_con_falla + ganancia
-    
-    # IVA
     iva_monto = subtotal_con_ganancia * iva if aplicar_iva else 0
     precio_final = subtotal_con_ganancia + iva_monto
 
@@ -205,12 +202,15 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
 
     with col2:
         st.metric("**Costo + Falla (10%)**", f"${costo_con_falla:,.2f}")
+        st.caption("Costo de producción × 1.10")
+        
         st.metric("**IVA**", f"${iva_monto:,.2f}" if aplicar_iva else "$0.00")
+        st.caption("16% sobre (Costo + Falla + Ganancia)" if aplicar_iva else "No se aplicó IVA")
 
     st.write("**────────────────────**")
     st.success(f"**TOTAL A COBRAR: ${precio_final:,.2f} MXN**")
 
-    # ==================== DESGLOSE DETALLADO (sin cambios) ====================
+    # ==================== DESGLOSE DETALLADO ====================
     st.divider()
     st.write("### 📋 Desglose Detallado")
     
