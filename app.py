@@ -140,7 +140,12 @@ else:
         minutos = st.number_input("Minutos", min_value=0, max_value=59, value=None, step=1, placeholder="0")
     tiempo_total = (horas or 0) + ((minutos or 0) / 60)
 
-num_placas = st.number_input("Número de placas", min_value=1, value=None, step=1, placeholder="1")
+# ==================== NÚMERO DE PIEZAS ====================
+num_piezas = st.number_input("Número de piezas / figuras que se obtienen", 
+                             min_value=1, 
+                             value=1, 
+                             step=1, 
+                             placeholder="1")
 
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
