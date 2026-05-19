@@ -3,8 +3,30 @@ import json
 import os
 import pandas as pd
 
-st.set_page_config(page_title="Calculadora de Precios", layout="centered")
+st.set_page_config(page_title="Mini Prints", layout="centered", page_icon="🖨️")
+
+# ==================== ESTILO MODERNO ====================
+st.markdown("""
+<style>
+    .main { background-color: #0a0a0f; }
+    h1 { color: #f97316; font-size: 2.8rem; font-weight: 800; }
+    h2, h3 { color: #e2e4f0; }
+    .stMetric { background: #161820; border-radius: 12px; padding: 15px; border: 1px solid #252736; }
+    .stButton>button { 
+        background: linear-gradient(135deg, #f97316, #ea580c); 
+        color: white; 
+        border-radius: 12px; 
+        height: 55px; 
+        font-size: 18px; 
+        font-weight: bold;
+    }
+    .dataframe { background: #161820; border: 1px solid #252736; border-radius: 10px; }
+    .stExpander { border: 1px solid #252736; border-radius: 12px; }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🖨️ Mini Prints")
+st.markdown("**Cotizador Profesional de Impresión 3D**")
 
 # ==================== GESTOR DE MATERIALES ====================
 DATA_FILE = "materiales.json"
@@ -179,28 +201,20 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     costo_maquina_total = tiempo_total * costo_maquina_hora
     costo_mano_obra_total = horas_mano_obra * costo_mano_obra_hora if aplicar_mano_obra else 0
   
-    # === COSTO DE PRODUCCIÓN ===
     costo_produccion = costo_material_total + costo_electricidad_total + costo_maquina_total + costo_mano_obra_total
     costo_con_falla = costo_produccion * (1 + margen_falla)
-   
-    # === GANANCIA ===
     precio_sin_iva = costo_con_falla / (1 - margen_ganancia)
     ganancia = precio_sin_iva - costo_con_falla
-   
-    # === IVA ===
     iva_monto = precio_sin_iva * iva if aplicar_iva else 0
     precio_final = precio_sin_iva + iva_monto
 
-    # === COSTO POR UNIDAD ===
     costo_por_unidad = precio_final / num_piezas if num_piezas > 0 else 0
 
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
   
     st.divider()
    
-    # ==================== RESUMEN FINAL ====================
     st.write("### 📊 Resumen Final")
-   
     col1, col2 = st.columns(2)
     with col1:
         st.metric("**Costo de Producción**", f"${costo_produccion:,.2f}")
@@ -213,10 +227,8 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     st.success(f"**TOTAL A COBRAR: ${precio_final:,.2f} MXN**")
     st.metric("**💎 Costo por Unidad**", f"${costo_por_unidad:,.2f}", help=f"Total ÷ {num_piezas} piezas")
 
-    # ==================== DESGLOSE DETALLADO ====================
     st.divider()
     st.write("### 📋 Desglose Detallado")
-   
     st.write("**🧵 Materiales utilizados:**")
     st.dataframe(pd.DataFrame(detalles_materiales), use_container_width=True, hide_index=True)
    
