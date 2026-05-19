@@ -3,31 +3,26 @@ import json
 import os
 import pandas as pd
 
-st.set_page_config(page_title="Mini Prints", layout="centered", page_icon="🖨️")
+st.set_page_config(page_title="Mini Prints", layout="wide", page_icon="🖨️")
 
 # ==================== ESTILO MODERNO ====================
 st.markdown("""
 <style>
     .main { background-color: #0a0a0f; }
-    h1 { color: #f97316; font-size: 2.8rem; font-weight: 800; }
-    h2, h3 { color: #e2e4f0; }
-    .stMetric { background: #161820; border-radius: 12px; padding: 15px; border: 1px solid #252736; }
-    .stButton>button { 
-        background: linear-gradient(135deg, #f97316, #ea580c); 
-        color: white; 
-        border-radius: 12px; 
-        height: 55px; 
-        font-size: 18px; 
-        font-weight: bold;
-    }
+    h1 { color: #f97316; font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; }
+    .stApp { background-color: #0a0a0f; }
+    .stMetric { background: #161820; border: 1px solid #252736; border-radius: 12px; padding: 15px; }
+    .stButton>button { background: linear-gradient(135deg, #f97316, #ea580c); color: white; border-radius: 12px; height: 55px; font-size: 18px; font-weight: bold; }
     .dataframe { background: #161820; border: 1px solid #252736; border-radius: 10px; }
-    .stExpander { border: 1px solid #252736; border-radius: 12px; }
+    .stExpander { border: 1px solid #252736; border-radius: 12px; background: #161820; }
+    label { color: #a1a1aa; }
 </style>
 """, unsafe_allow_html=True)
 
 st.title("🖨️ Mini Prints")
-st.markdown("**Cotizador Profesional de Impresión 3D**")
+st.markdown("**Calculadora Profesional de Impresión 3D**")
 
+# ==================== Tu código anterior (mantengo todo lo funcional) ====================
 # ==================== GESTOR DE MATERIALES ====================
 DATA_FILE = "materiales.json"
 
@@ -119,6 +114,8 @@ multiples_impresiones = st.checkbox("¿La impresión consta de más de una impre
 
 materiales_lista = list(st.session_state.materiales.keys())
 
+# (El resto de tu código de Materiales, Tiempo, Número de Piezas y Cálculo se mantiene igual)
+
 # ==================== MATERIALES ====================
 if es_multicolor:
     st.subheader("Materiales (hasta 6)")
@@ -161,16 +158,11 @@ else:
         minutos = st.number_input("Minutos", min_value=0, max_value=59, value=None, step=1, placeholder="0")
     tiempo_total = (horas or 0) + ((minutos or 0) / 60)
 
-# ==================== NÚMERO DE PIEZAS ====================
-num_piezas = st.number_input("Número de piezas / figuras que se obtienen", 
-                             min_value=1, 
-                             value=1, 
-                             step=1, 
-                             placeholder="1")
+num_piezas = st.number_input("Número de piezas / figuras que se obtienen", min_value=1, value=1, step=1, placeholder="1")
 
 # ==================== CÁLCULO ====================
 if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=True):
-   
+    # (Tu código de cálculo completo aquí - lo mantengo igual)
     if es_multicolor:
         costo_material_total = 0.0
         detalles_materiales = []
@@ -207,13 +199,11 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     ganancia = precio_sin_iva - costo_con_falla
     iva_monto = precio_sin_iva * iva if aplicar_iva else 0
     precio_final = precio_sin_iva + iva_monto
-
     costo_por_unidad = precio_final / num_piezas if num_piezas > 0 else 0
 
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
   
     st.divider()
-   
     st.write("### 📊 Resumen Final")
     col1, col2 = st.columns(2)
     with col1:
@@ -231,14 +221,14 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     st.write("### 📋 Desglose Detallado")
     st.write("**🧵 Materiales utilizados:**")
     st.dataframe(pd.DataFrame(detalles_materiales), use_container_width=True, hide_index=True)
-   
+
     st.write("**⚡ Costo de Electricidad:**")
     data_elec = {
         "Concepto": ["Consumo impresora", "Tiempo total", "Energía consumida", "Costo por kWh", "Costo total"],
         "Valor": [f"{consumo} Watts", f"{tiempo_total:.2f} h", f"{tiempo_total*(consumo/1000):.3f} kWh", f"${costo_electricidad}/kWh", f"${costo_electricidad_total:,.2f}"]
     }
     st.dataframe(pd.DataFrame(data_elec), use_container_width=True, hide_index=True)
-   
+
     st.write("**🔧 Costo de Máquina:**")
     data_maquina = {
         "Concepto": ["Costo por hora", "Tiempo total", "Costo total máquina"],
