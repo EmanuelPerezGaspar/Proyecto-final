@@ -33,7 +33,6 @@ if 'materiales' not in st.session_state:
 
 # ==================== CONFIGURACIÓN (SIDEBAR) ====================
 st.sidebar.header("⚙️ Parametros básicos")
-
 impresora = st.sidebar.selectbox("Impresora usada", ["A1 MINI", "A1"])
 if impresora == "A1 MINI":
     consumo = 280
@@ -193,7 +192,7 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     precio_final = precio_sin_iva + iva_monto
 
     # === COSTO POR UNIDAD ===
-    costo_por_unidad = precio_final / num_piezas if num_piezas and num_piezas > 0 else 0
+    costo_por_unidad = precio_final / num_piezas if num_piezas > 0 else 0
 
     st.success(f"**PRECIO FINAL: ${precio_final:,.2f} MXN**")
   
@@ -209,10 +208,10 @@ if st.button("🚀 Calcular Precio Final", type="primary", use_container_width=T
     with col2:
         st.metric("**Subtotal + Falla**", f"${costo_con_falla:,.2f}")
         st.metric("**IVA**", f"${iva_monto:,.2f}" if aplicar_iva else "$0.00")
-    
+   
     st.write("**────────────────────**")
     st.success(f"**TOTAL A COBRAR: ${precio_final:,.2f} MXN**")
-    st.metric("**Costo por Unidad**", f"${costo_por_unidad:,.2f}", delta=f"({num_piezas} piezas)")
+    st.metric("**💎 Costo por Unidad**", f"${costo_por_unidad:,.2f}", help=f"Total ÷ {num_piezas} piezas")
 
     # ==================== DESGLOSE DETALLADO ====================
     st.divider()
